@@ -400,12 +400,28 @@ class WirePluginTest {
   }
 
   @Test
-  fun javaProjectJavaProtos() {
+  fun dontGenerateProtosByDefault() {
+    val fixtureRoot = File("src/test/projects/generateonbuild-default")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
+
+    assertThat(result.task(":generateProtos")).isNull()
+  }
+
+  @Test
+  fun dontGenerateProtosWhenGenerateOnBuildIsFalse() {
+    val fixtureRoot = File("src/test/projects/generateonbuild-false")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
+
+    assertThat(result.task(":generateProtos")).isNull()
+  }
+
+  @Test
+  fun generateJavaProtosWhenBuildingJavaProject() {
     val fixtureRoot = File("src/test/projects/java-project-java-protos")
 
-    val result = gradleRunner.runFixture(fixtureRoot) {
-      withArguments("run", "--stacktrace").build()
-    }
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
 
     assertThat(result.task(":generateProtos")).isNotNull
     assertThat(result.output)
@@ -422,12 +438,10 @@ class WirePluginTest {
   }
 
   @Test
-  fun javaProjectKotlinProtos() {
+  fun generateKotlinProtosWhenBuildingJavaProject() {
     val fixtureRoot = File("src/test/projects/java-project-kotlin-protos")
 
-    val result = gradleRunner.runFixture(fixtureRoot) {
-      withArguments("run", "--stacktrace").build()
-    }
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
 
     assertThat(result.task(":generateProtos")).isNotNull
     assertThat(result.output)
@@ -444,12 +458,10 @@ class WirePluginTest {
   }
 
   @Test
-  fun kotlinProjectJavaProtos() {
+  fun generateJavaProtosWhenBuildingKotlinProject() {
     val fixtureRoot = File("src/test/projects/kotlin-project-java-protos")
 
-    val result = gradleRunner.runFixture(fixtureRoot) {
-      withArguments("run", "--stacktrace").build()
-    }
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
 
     assertThat(result.task(":generateProtos")).isNotNull
     assertThat(result.output)
@@ -466,12 +478,10 @@ class WirePluginTest {
   }
 
   @Test
-  fun kotlinProjectKotlinProtos() {
+  fun generateKotlinProtosWhenBuildingKotlinProject() {
     val fixtureRoot = File("src/test/projects/kotlin-project-kotlin-protos")
 
-    val result = gradleRunner.runFixture(fixtureRoot) {
-      withArguments("run", "--stacktrace").build()
-    }
+    val result = gradleRunner.runFixture(fixtureRoot) { withArguments("run").build() }
 
     assertThat(result.task(":generateProtos")).isNotNull
     assertThat(result.output)

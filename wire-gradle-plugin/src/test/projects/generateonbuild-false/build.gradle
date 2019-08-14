@@ -18,11 +18,7 @@ dependencies {
 }
 
 wire {
-  generateOnBuild true
-
-  kotlin {
-    javaInterop true
-  }
+  generateOnBuild false
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {

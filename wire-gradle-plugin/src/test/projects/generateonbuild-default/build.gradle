@@ -17,14 +17,6 @@ dependencies {
   implementation "com.squareup.wire:wire-runtime-multiplatform:$VERSION_NAME"
 }
 
-wire {
-  generateOnBuild true
-
-  kotlin {
-    javaInterop true
-  }
-}
-
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
   kotlinOptions {
     jvmTarget = "1.8"

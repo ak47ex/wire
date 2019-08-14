@@ -18,6 +18,8 @@ dependencies {
 }
 
 wire {
+  generateOnBuild true
+
   kotlin {}
 }
 
