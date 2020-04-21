@@ -493,6 +493,10 @@ val stegosaurus = stegosaurus.copy(
 println("Here are some photos of ${stegosaurus.name}: ${stegosaurus.picture_urls}")
 ```
 
+Wire gRPC
+-----------
+
+Since version 3.0.0, Wire supports [gRPC][grpc_docs].
 
 Generating Code With Wire
 -------------------------
@@ -507,7 +511,7 @@ automatically add the generated Java code to your project's source roots.
     <plugin>
       <groupId>com.squareup.wire</groupId>
       <artifactId>wire-maven-plugin</artifactId>
-      <version>${project.version}</version>
+      <version>3.1.0</version>
       <executions>
         <execution>
           <phase>generate-sources</phase>
@@ -567,32 +571,14 @@ With Maven:
 <dependency>
   <groupId>com.squareup.wire</groupId>
   <artifactId>wire-runtime</artifactId>
-  <version>2.2.0</version>
+  <version>3.1.0</version>
 </dependency>
 ```
 
 With Gradle:
 
 ```groovy
-compile 'com.squareup.wire:wire-runtime:2.2.0'
-```
-
-### Wire 3 Alpha
-
-With Maven:
-
-```xml
-<dependency>
-  <groupId>com.squareup.wire</groupId>
-  <artifactId>wire-runtime</artifactId>
-  <version>3.0.0-rc01</version>
-</dependency>
-```
-
-With Gradle:
-
-```groovy
-api 'com.squareup.wire:wire-runtime:3.0.0-rc01'
+api "com.squareup.wire:wire-runtime:3.1.0"
 ```
 
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
@@ -617,7 +603,8 @@ See [Google's excellent documentation][schema_docs] on the structure and syntax 
  [google_protos]: https://developers.google.com/protocol-buffers/docs/overview
  [effective_java]: https://www.amazon.ca/Effective-Java-3rd-Joshua-Bloch/dp/0134685997/
  [schema_docs]: https://developers.google.com/protocol-buffers/docs/proto
- [compiler_docs]: docs/wire_compiler.md
+ [compiler_docs]: wire-library/docs/wire_compiler.md
+ [grpc_docs]: wire-library/docs/wire_grpc.md
  [dl_runtime]: https://search.maven.org/remote_content?g=com.squareup.wire&a=wire-runtime&v=LATEST
  [dl_compiler]: https://search.maven.org/remote_content?g=com.squareup.wire&a=wire-compiler&v=LATEST&c=jar-with-dependencies
  [snap]: https://oss.sonatype.org/content/repositories/snapshots/

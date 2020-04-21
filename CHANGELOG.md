@@ -1,8 +1,123 @@
 Change Log
 ==========
 
+Version 3.1.0
+-------------
+
+_2020-02-06_
+
+This release includes major non-backwards-compatible API changes to the `wire-schema` module. This
+will break tools that use Wire's schema modeling as a standalone library. We are making big changes
+to this component and we sacrificed API compatibility to accelerate these improvements.
+
+ * New: `proto { ... }` target in the Wire Gradle plugin. Use this to perform basic source code
+   transformations on collections of `.proto` files. We use it to prune large collections of protos
+   to just the subset used by the application.
+ * Fix: Support all forms of reserved extensions, such as `extensions 1, 3 to 5, 7;`.
+ * Fix: Don't re-generate source files when their `.proto` files haven't changed.
+ * New: `includes`, `excludes`, `root`, and `prune` give precedence to the most precise rule.
+   Previously `excludes` always took precedence over `includes`, and `prune` always took precedence
+   over `root`.
+ * Fix: Generate non-instantiable class for enclosing types in Kotlin. These are emitted when a
+   nested type is retained but its enclosing type is pruned.
+ * Fix: Do not fail to build when the profile cannot find a dependency.
+
+
+Version 3.0.3
+-------------
+
+_2019-12-23_
+
+Starting with this version the Wire Maven plugin is no longer maintained and has been removed from
+the repository.
+
+ * New: Support for custom options in Kotlin.
+ * New: Kotlin 1.3.61.
+ * New: Add support for custom targets in `WireRun` and the Gradle plugin.
+ * New: Improve schema evaluation algorithm when loading separate `sourcePath` and `protoPath`.
+ * New: Lazy loading of `protoPath` contents.
+ * New: Make it possible to customize Gradle plugin's configurations.
+ * New: Make it possible to customize Gradle plugin's `generateProtos` task.
+ * Fix: Use correct `ProtoAdapter` for packed fields in Kotlin.
+ * Fix: Properly handle name clashes between fields and enclosing types.
+ * Fix: Preserve the package name on files loaded from `protoPath`.
+ * Fix: ProtoPruner: Properly evaluate Pruner's reachable objects.
+ * Fix: ProtoPruner: Ensure `--excludes` properly prunes options.
+ * Fix: ProtoPruner: Keep used `ServiceOptions` and `MethodOptions` when pruning.
+
+Version 3.0.2
+-------------
+
+_2019-11-22_
+
+ * Fix: Generate correct unknownFields code if a message field's name is a Kotlin keyword.
+ * Fix: Properly handle unknown enum values in Kotlin.
+ * Fix: ProtoPruner: retain used extends.
+ * Fix: ProtoPruner: retain only used imports.
+ * Fix: ProtoPruner: use NewSchemaLoader that correctly loads google.protobuf.descriptor.
+ * Fix: ProtoPruner: print default values for scalar types for proto target within the options.
+ * Fix: ProtoPruner: fix handling of options.
+ * Fix: ProtoPruner: print default values for enums.
+
+Version 3.0.1
+-------------
+
+_2019-10-18_
+
+ * Fix: Use the correct adapter path for gRPC endpoints that customize the Java package.
+ * Fix: Preserve documentation in generated services.
+ * Fix: Fail to generate code if the source directory doesn't exist.
+ * Fix: Make Kotlin consistent with Java for unknown enum constants. We now treat these as unknown
+   fields rather than failing to decode the enclosing message.
+
+Version 3.0.0
+-------------
+
+_2019-10-07_
+
+ * Update: All gRPC networking calls are encoded in gzip.
+
+Version 3.0.0-rc03
+------------------
+
+_2019-10-04_
+
+ * Fix: Update dependency to a stable version, `2.4.1` of Okio.
+
+Version 3.0.0-rc02
+------------------
+
+_2019-10-01_
+
+### Kotlin
+
+ * Fix: Nullify other oneof fields in Builder setters in Kotlin interop.
+ * Fix: Use unknownFields in `hashCode()`.
+ * Fix: Remove `withoutUnknownFields()` from Kotlin.
+
+### gRPC
+
+ * Update: Total rewrite of the generated interfaces for clients:
+
+   Introduce two interfaces, `GrpcCall` for simple RPCs, and `GrpcStreamingCall` fox duplex ones. Both
+   will provide blocking and suspending API, including a reference to the underlying
+   [OkHttp](https://github.com/square/okhttp)
+   [Call](https://square.github.io/okhttp/4.x/okhttp/okhttp3/-call/) object and its timeout.
+
+ * Fix: Send stream cancels from clients.
+
+### Misc
+
+ * New: Changes printing of options and enums:
+   * No empty lines between options and fields for enums.
+   * Print options on new lines only when more than one.
+ * Fix: Don't cache Message's hash code on Native.
+ * Fix: Fix handling of map values in `FieldBinding`.
+ * Fix: Fix import fails on windows due to path separator.
+ * Fix: Don't emit proto2 sources for proto3 syntax.
+
 Version 3.0.0-rc01
----------------------
+------------------
 
 _2019-08-02_
 

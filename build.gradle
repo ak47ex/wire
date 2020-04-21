@@ -1,40 +1,41 @@
 buildscript {
   ext.versions = [
       'android': '4.1.1.4',
-      'coroutines': '1.2.1',
+      'coroutines': '1.3.3',
       'errorprone': '2.0.21',
-      'grpc': '1.22.1',
+      'grpc': '1.27.1',
       'gson': '2.8.1',
       'guava': '20.0',
-      'javapoet': '1.10.0',
-      'kotlinpoet': '1.3.0',
+      'javapoet': '1.11.1',
+      'kotlinpoet': '1.5.0',
       'jsr305': '3.0.2',
-      'kotlin': '1.3.40',
-      'okio': '2.3.0',
-      'okhttp': '4.0.1',
+      'kotlin': '1.3.71',
+      'okio': '2.5.0',
+      'okhttp': '4.2.2',
       'moshi': '1.6.0',
-      'protobuf': '0.8.10',
+      'protobuf': '3.11.4',
+      'protobufGradlePlugin': '0.8.10',
       'protoc': '3.0.0',
       'junit': '4.12',
       'assertj': '3.11.0',
       'jimfs': '1.0',
       'animalSniffer': '1.16',
       'animalSnifferGradle': '1.5.0',
-      'maven': '3.5.0',
-      'mavenAnnotations': '3.5',
-      'mavenPluginBuilder': '1.2.4',
       'mavenPublish': '0.8.0',
-      'releasedWire': '3.0.0-alpha01'
   ]
 
   ext.deps = [
       plugins: [
           kotlin: "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
           shadow: 'com.github.jengelman.gradle.plugins:shadow:4.0.1',
-          releasedWire: "com.squareup.wire:wire-gradle-plugin:${versions.releasedWire}",
+          wire: "com.squareup.wire:wire-gradle-plugin",
           japicmp: 'me.champeau.gradle:japicmp-gradle-plugin:0.2.8',
+          mavenPublish: "com.vanniktech:gradle-maven-publish-plugin:${versions.mavenPublish}"
       ],
       'android': "com.google.android:android:${versions.android}",
+      'androidx': [
+          annotations: "androidx.annotation:annotation:1.1.0",
+      ],
       'guava': "com.google.guava:guava:${versions.guava}",
       'okio': [
           'jvm': "com.squareup.okio:okio:${versions.okio}",
@@ -60,13 +61,17 @@ buildscript {
           ],
           'test': [
               'common': "org.jetbrains.kotlin:kotlin-test-common",
-              'annotations': "org.jetbrains.kotlin:kotlin-test-annotations-common",    
+              'annotations': "org.jetbrains.kotlin:kotlin-test-annotations-common",
               'junit': "org.jetbrains.kotlin:kotlin-test-junit",
               'js': "org.jetbrains.kotlin:kotlin-test-js",
           ],
           'coroutines': [
-              'core': "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}"
-          ]
+              'core': [
+                  // Due to historical reasons, this is the artifact containing the Gradle metadata,
+                  // see https://twitter.com/benasher44/status/1208944677778534401.
+                  'common': "org.jetbrains.kotlinx:kotlinx-coroutines-core-native:${versions.coroutines}",
+              ],
+          ],
       ],
       'moshi': "com.squareup.moshi:moshi:${versions.moshi}",
       'junit': "junit:junit:${versions.junit}",
@@ -76,30 +81,31 @@ buildscript {
           'gradle': "ru.vyarus:gradle-animalsniffer-plugin:${versions.animalSnifferGradle}",
           'annotations': "org.codehaus.mojo:animal-sniffer-annotations:${versions.animalSniffer}",
       ],
-      'maven': [
-          'core': "org.apache.maven:maven-core:${versions.maven}",
-          'plugin': [
-              'api': "org.apache.maven:maven-plugin-api:${versions.maven}",
-              'annotations': "org.apache.maven.plugin-tools:maven-plugin-annotations:${versions.mavenAnnotations}",
-              'builder': "gradle.plugin.com.liferay:gradle-plugins-maven-plugin-builder:${versions.mavenPluginBuilder}",
-              'publish': "com.vanniktech:gradle-maven-publish-plugin:${versions.mavenPublish}",
-          ]
+      'protobuf': [
+          'gradlePlugin': "com.google.protobuf:protobuf-gradle-plugin:${versions.protobufGradlePlugin}",
+          'java': "com.google.protobuf:protobuf-java:${versions.protoc}",
+          'javaUtil': "com.google.protobuf:protobuf-java-util:${versions.protoc}",
+          'protoc': "com.google.protobuf:protoc:${versions.protoc}",
       ],
-      'protoc': "com.google.protobuf:protoc:${versions.protoc}",
-      'protobufGradlePlugin': "com.google.protobuf:protobuf-gradle-plugin:${versions.protobuf}",
-      'releasedWire': [
-          'runtime': "com.squareup.wire:wire-runtime:${versions.releasedWire}",
+      'wire': [
+          'compiler': "com.squareup.wire:wire-compiler",
+          'grpcClient': "com.squareup.wire:wire-grpc-client",
+          'javaGenerator': "com.squareup.wire:wire-java-generator",
+          'kotlinGenerator': "com.squareup.wire:wire-kotlin-generator",
+          'moshiAdapter': "com.squareup.wire:wire-moshi-adapter",
+          'runtime': "com.squareup.wire:wire-runtime",
+          'schema': "com.squareup.wire:wire-schema",
+          'testUtils': "com.squareup.wire:wire-test-utils",
       ],
   ]
 
   dependencies {
     classpath deps.plugins.kotlin
     classpath deps.plugins.shadow
-    classpath deps.plugins.releasedWire
+    classpath deps.plugins.wire
     classpath deps.plugins.japicmp
+    classpath deps.plugins.mavenPublish
     classpath deps.animalSniffer.gradle
-    classpath deps.maven.plugin.builder
-    classpath deps.maven.plugin.publish
   }
 
   repositories {
@@ -109,25 +115,13 @@ buildscript {
 }
 
 allprojects {
-  group = GROUP
-  version = VERSION_NAME
-
   repositories {
     mavenCentral()
+    google()
   }
 }
 
 subprojects { project ->
-  // The `application` plugin internally applies the `distribution` plugin and
-  // automatically adds tasks to create/publish tar and zip artifacts.
-  // https://docs.gradle.org/current/userguide/application_plugin.html
-  // https://docs.gradle.org/current/userguide/distribution_plugin.html#sec:publishing_distributions_upload
-  plugins.withType(DistributionPlugin) {
-    distTar.enabled = false
-    distZip.enabled = false
-    configurations.archives.artifacts.removeAll { it.file =~ 'tar' || it.file =~ 'zip' }
-  }
-
   tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
       jvmTarget = "1.8"
@@ -137,24 +131,6 @@ subprojects { project ->
   tasks.withType(JavaCompile).configureEach {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-  }
-
-  if (project.name != 'wire-runtime' && project.name != 'japicmp' && project.name != 'wire-tests') {
-    apply plugin: 'com.vanniktech.maven.publish'
-  } else {
-    tasks.create('uploadArchives') {
-      // TODO(egorand): Find out why this became a problem.
-      // No-op task to prevent Gradle from calling a real uploadArchives task which is added by an
-      // unknown plugin (or Gradle itself) and fails for multiplatform projects.
-    }
-  }
-  apply plugin: 'checkstyle'
-
-  afterEvaluate {
-    checkstyle {
-      toolVersion '7.7'
-      sourceSets = [project.sourceSets.main]
-    }
   }
 }
 

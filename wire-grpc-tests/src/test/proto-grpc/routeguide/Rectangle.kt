@@ -47,9 +47,7 @@ class Rectangle(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -62,7 +60,8 @@ class Rectangle(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = lo.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + lo.hashCode()
       result = result * 37 + hi.hashCode()
       super.hashCode = result
     }
@@ -86,7 +85,8 @@ class Rectangle(
     @JvmField
     val ADAPTER: ProtoAdapter<Rectangle> = object : ProtoAdapter<Rectangle>(
       FieldEncoding.LENGTH_DELIMITED, 
-      Rectangle::class
+      Rectangle::class, 
+      "type.googleapis.com/routeguide.Rectangle"
     ) {
       override fun encodedSize(value: Rectangle): Int = 
         Point.ADAPTER.encodedSizeWithTag(1, value.lo) +

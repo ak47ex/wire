@@ -66,9 +66,7 @@ class RouteSummary(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -83,7 +81,8 @@ class RouteSummary(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = point_count.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + point_count.hashCode()
       result = result * 37 + feature_count.hashCode()
       result = result * 37 + distance.hashCode()
       result = result * 37 + elapsed_time.hashCode()
@@ -113,7 +112,8 @@ class RouteSummary(
     @JvmField
     val ADAPTER: ProtoAdapter<RouteSummary> = object : ProtoAdapter<RouteSummary>(
       FieldEncoding.LENGTH_DELIMITED, 
-      RouteSummary::class
+      RouteSummary::class, 
+      "type.googleapis.com/routeguide.RouteSummary"
     ) {
       override fun encodedSize(value: RouteSummary): Int = 
         ProtoAdapter.INT32.encodedSizeWithTag(1, value.point_count) +

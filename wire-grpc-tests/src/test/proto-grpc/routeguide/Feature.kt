@@ -8,6 +8,7 @@ import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.ProtoReader
 import com.squareup.wire.ProtoWriter
 import com.squareup.wire.WireField
+import com.squareup.wire.internal.sanitize
 import kotlin.Any
 import kotlin.AssertionError
 import kotlin.Boolean
@@ -48,9 +49,7 @@ class Feature(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -63,7 +62,8 @@ class Feature(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = name.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + name.hashCode()
       result = result * 37 + location.hashCode()
       super.hashCode = result
     }
@@ -72,7 +72,7 @@ class Feature(
 
   override fun toString(): String {
     val result = mutableListOf<String>()
-    if (name != null) result += """name=$name"""
+    if (name != null) result += """name=${sanitize(name)}"""
     if (location != null) result += """location=$location"""
     return result.joinToString(prefix = "Feature{", separator = ", ", postfix = "}")
   }
@@ -87,7 +87,8 @@ class Feature(
     @JvmField
     val ADAPTER: ProtoAdapter<Feature> = object : ProtoAdapter<Feature>(
       FieldEncoding.LENGTH_DELIMITED, 
-      Feature::class
+      Feature::class, 
+      "type.googleapis.com/routeguide.Feature"
     ) {
       override fun encodedSize(value: Feature): Int = 
         ProtoAdapter.STRING.encodedSizeWithTag(1, value.name) +

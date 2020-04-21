@@ -8,6 +8,7 @@ import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.ProtoReader
 import com.squareup.wire.ProtoWriter
 import com.squareup.wire.WireField
+import com.squareup.wire.internal.sanitize
 import kotlin.Any
 import kotlin.AssertionError
 import kotlin.Boolean
@@ -46,9 +47,7 @@ class RouteNote(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -61,7 +60,8 @@ class RouteNote(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = location.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + location.hashCode()
       result = result * 37 + message.hashCode()
       super.hashCode = result
     }
@@ -71,7 +71,7 @@ class RouteNote(
   override fun toString(): String {
     val result = mutableListOf<String>()
     if (location != null) result += """location=$location"""
-    if (message != null) result += """message=$message"""
+    if (message != null) result += """message=${sanitize(message)}"""
     return result.joinToString(prefix = "RouteNote{", separator = ", ", postfix = "}")
   }
 
@@ -85,7 +85,8 @@ class RouteNote(
     @JvmField
     val ADAPTER: ProtoAdapter<RouteNote> = object : ProtoAdapter<RouteNote>(
       FieldEncoding.LENGTH_DELIMITED, 
-      RouteNote::class
+      RouteNote::class, 
+      "type.googleapis.com/routeguide.RouteNote"
     ) {
       override fun encodedSize(value: RouteNote): Int = 
         Point.ADAPTER.encodedSizeWithTag(1, value.location) +

@@ -43,9 +43,7 @@ class Point(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -58,7 +56,8 @@ class Point(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = latitude.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + latitude.hashCode()
       result = result * 37 + longitude.hashCode()
       super.hashCode = result
     }
@@ -82,7 +81,8 @@ class Point(
     @JvmField
     val ADAPTER: ProtoAdapter<Point> = object : ProtoAdapter<Point>(
       FieldEncoding.LENGTH_DELIMITED, 
-      Point::class
+      Point::class, 
+      "type.googleapis.com/routeguide.Point"
     ) {
       override fun encodedSize(value: Point): Int = 
         ProtoAdapter.INT32.encodedSizeWithTag(1, value.latitude) +

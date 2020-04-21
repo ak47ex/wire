@@ -37,9 +37,7 @@ class FeatureDatabase(
     message = "Shouldn't be used in Kotlin",
     level = DeprecationLevel.HIDDEN
   )
-  override fun newBuilder(): Nothing {
-    throw AssertionError()
-  }
+  override fun newBuilder(): Nothing = throw AssertionError()
 
   override fun equals(other: Any?): Boolean {
     if (other === this) return true
@@ -51,7 +49,8 @@ class FeatureDatabase(
   override fun hashCode(): Int {
     var result = super.hashCode
     if (result == 0) {
-      result = feature.hashCode()
+      result = unknownFields.hashCode()
+      result = result * 37 + feature.hashCode()
       super.hashCode = result
     }
     return result
@@ -70,7 +69,8 @@ class FeatureDatabase(
     @JvmField
     val ADAPTER: ProtoAdapter<FeatureDatabase> = object : ProtoAdapter<FeatureDatabase>(
       FieldEncoding.LENGTH_DELIMITED, 
-      FeatureDatabase::class
+      FeatureDatabase::class, 
+      "type.googleapis.com/routeguide.FeatureDatabase"
     ) {
       override fun encodedSize(value: FeatureDatabase): Int = 
         Feature.ADAPTER.asRepeated().encodedSizeWithTag(1, value.feature) +

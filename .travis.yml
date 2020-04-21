@@ -1,14 +1,21 @@
-language: java
+os:
+  - osx
 
-jdk:
-  - openjdk8
+osx_image: xcode11.2
+
+before_install:
+  - brew update # To avoid SHA-256 checksum errors for example.
+  - brew cask install homebrew/cask-versions/adoptopenjdk8
+  - export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
+  - brew cask install google-chrome # Required to run JS tests. Remove when https://youtrack.jetbrains.com/issue/KT-32075 ships.
 
 before_script:
   - ./gradlew clean generateTests
   - if [ ! -z "$(git status --porcelain)" ]; then git diff; echo -e "\nTest files changed. Did you run ./gradlew generateTests?"; exit 1; fi
 
 script:
-  - ./gradlew clean build
+  - ./gradlew -p wire-library build
+  - ./gradlew build
 
 after_success:
   - .buildscript/deploy_snapshot.sh
@@ -27,10 +34,9 @@ notifications:
 
 sudo: false
 
-# TODO(egorand): Re-enable caching once Wire doesn't depend on Okio snapshot anymore
-# cache:
-#  directories:
-#    - $HOME/.gradle/caches/
-#    - $HOME/.gradle/wrapper/
-#    - $HOME/.gradle/native/
-#    - $HOME/.gradle/daemon/native/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.gradle/native/
+    - $HOME/.gradle/daemon/native/
