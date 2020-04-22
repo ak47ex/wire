@@ -459,12 +459,15 @@ class KotlinGenerator private constructor(
       val fieldType = field.type()
       val defaultValue = field.getDefaultValue()
 
-      val parameterSpec = ParameterSpec.builder(fieldName, if (!field.isEnum) fieldClass else fieldClass)
-      if (field.isEnum) {
-        val firstEnumValue = findFirstEnumValue(fieldType)
-        parameterSpec.defaultValue(CodeBlock.of("%T.%L", fieldType.typeName, firstEnumValue))
-      } else if (!field.isRequired && !fieldType.isMap) {
-        parameterSpec.defaultValue(defaultValue)
+      val parameterSpec = ParameterSpec.builder(fieldName, fieldClass)
+      when {
+        field.isEnum && !field.isRepeated -> {
+            val firstEnumValue = findFirstEnumValue(fieldType)
+            parameterSpec.defaultValue(CodeBlock.of("%T.%L", fieldType.typeName, firstEnumValue))
+        }
+        (!field.isRequired && !fieldType.isMap) -> {
+            parameterSpec.defaultValue(field.getDefaultValue())
+        }
       }
 
       if (field.isDeprecated) {
