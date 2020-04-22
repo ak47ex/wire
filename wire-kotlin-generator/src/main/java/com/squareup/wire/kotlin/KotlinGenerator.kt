@@ -72,10 +72,11 @@ import okio.ByteString
 import java.util.Locale
 
 class KotlinGenerator private constructor(
-        val schema: Schema,
-        private val nameToKotlinName: Map<ProtoType, ClassName>,
-        private val emitAndroid: Boolean,
-        private val javaInterOp: Boolean
+  val schema: Schema,
+  private val nameToKotlinName: Map<ProtoType, ClassName>,
+  private val emitAndroid: Boolean,
+  private val javaInterOp: Boolean,
+  private val blockingServices: Boolean
 ) {
   private val nameAllocatorStore = mutableMapOf<Type, NameAllocator>()
 
@@ -85,9 +86,20 @@ class KotlinGenerator private constructor(
     get() = schema.getType(this) is EnumType
   private val Type.typeName
     get() = type().typeName
+  private val Service.serviceName
+    get() = type().typeName
 
   /** Returns the full name of the class generated for [type].  */
   fun generatedTypeName(type: Type) = type.typeName
+
+  /** Returns the full name of the class generated for [service].  */
+  fun generatedServiceName(service: Service) = service.serviceName
+
+  /** Returns the full name of the class generated for [service]#[rpc].  */
+  fun generatedServiceRpcName(service: Service, rpc: Rpc): ClassName {
+      val typeName = service.serviceName
+      return typeName.peerClass(typeName.simpleName + rpc.name())
+  }
 
   fun generateType(type: Type): TypeSpec = when (type) {
     is MessageType -> generateMessage(type)
@@ -96,8 +108,14 @@ class KotlinGenerator private constructor(
     else -> error("Unknown type $type")
   }
 
-  fun generateService(service: Service): TypeSpec {
-    val interfaceName = service.name()
+  /**
+   * If [rpc] isn't null, this will generate code only for this rpc; otherwise, all rpcs of the
+   * [service] will be code generated.
+   */
+  fun generateService(service: Service, rpc: Rpc? = null): TypeSpec {
+      val (interfaceName, rpcs) =
+          if (rpc == null) generatedServiceName(service) to service.rpcs()
+          else generatedServiceRpcName(service, rpc) to listOf(rpc)
     // TODO(oldergod) maybe rename package or something to explicitly say it's grpc service?
     val superinterface = com.squareup.wire.Service::class.java
 
@@ -1149,9 +1167,10 @@ class KotlinGenerator private constructor(
 
     @JvmStatic @JvmName("get")
     operator fun invoke(
-            schema: Schema,
-            emitAndroid: Boolean = false,
-            javaInterop: Boolean = false
+      schema: Schema,
+      emitAndroid: Boolean = false,
+      javaInterop: Boolean = false,
+      blockingServices: Boolean = false
     ): KotlinGenerator {
       val map = BUILT_IN_TYPES.toMutableMap()
 
@@ -1174,7 +1193,7 @@ class KotlinGenerator private constructor(
         }
       }
 
-      return KotlinGenerator(schema, map, emitAndroid, javaInterop)
+      return KotlinGenerator(schema, map, emitAndroid, javaInterop, blockingServices)
     }
   }
 }
