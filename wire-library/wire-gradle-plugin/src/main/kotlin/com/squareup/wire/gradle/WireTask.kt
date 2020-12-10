@@ -16,16 +16,24 @@
 package com.squareup.wire.gradle
 
 import com.squareup.wire.VERSION
+import com.squareup.wire.schema.Location
 import com.squareup.wire.schema.Target
 import com.squareup.wire.schema.WireRun
+import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
+@CacheableTask
 open class WireTask : SourceTask() {
   @get:OutputDirectories
   var outputDirectories: List<File>? = null
@@ -34,16 +42,19 @@ open class WireTask : SourceTask() {
   var pluginVersion: String = VERSION
 
   @get:Internal
-  internal lateinit var sourceInput: WireInput
+  internal val sourceInput = project.objects.listProperty(Location::class.java)
 
   @get:Internal
-  internal lateinit var protoInput: WireInput
+  internal val protoInput = project.objects.listProperty(Location::class.java)
 
   @Input
   lateinit var roots: List<String>
 
   @Input
   lateinit var prunes: List<String>
+
+  @Input
+  lateinit var moves: List<Move>
 
   @Input
   @Optional
@@ -55,14 +66,17 @@ open class WireTask : SourceTask() {
 
   @Input
   @Optional
+  var onlyVersion: String? = null
+
+  @Input
+  @Optional
   var rules: String? = null
 
   @Input
   lateinit var targets: List<Target>
 
   @Input
-  @Optional
-  var proto3Preview: String? = null
+  var permitPackageCycles: Boolean = false
 
   @TaskAction
   fun generateWireFiles() {
@@ -89,8 +103,6 @@ open class WireTask : SourceTask() {
     if (includes.isEmpty() && excludes.isEmpty()) logger.info("NO INCLUDES OR EXCLUDES")
 
     if (logger.isDebugEnabled) {
-      sourceInput.debug(logger)
-      protoInput.debug(logger)
       logger.debug("roots: $roots")
       logger.debug("prunes: $prunes")
       logger.debug("rules: $rules")
@@ -98,15 +110,24 @@ open class WireTask : SourceTask() {
     }
 
     val wireRun = WireRun(
-        sourcePath = sourceInput.toLocations(),
-        protoPath = protoInput.toLocations(),
+        sourcePath = sourceInput.get(),
+        protoPath = protoInput.get(),
         treeShakingRoots = if (roots.isEmpty()) includes else roots,
         treeShakingRubbish = if (prunes.isEmpty()) excludes else prunes,
-        since = sinceVersion,
-        until = untilVersion,
+        moves = moves.map { it.toTypeMoverMove() },
+        sinceVersion = sinceVersion,
+        untilVersion = untilVersion,
+        onlyVersion = onlyVersion,
         targets = targets,
-        proto3Preview = (proto3Preview == "UNSUPPORTED")
+        permitPackageCycles = permitPackageCycles
     )
     wireRun.execute()
+  }
+
+  @InputFiles
+  @SkipWhenEmpty
+  @PathSensitive(PathSensitivity.RELATIVE)
+  override fun getSource(): FileTree {
+    return super.getSource()
   }
 }

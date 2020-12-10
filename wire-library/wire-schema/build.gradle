@@ -4,28 +4,28 @@ kotlin {
   jvm {
     withJava()
   }
-  js {
-    configure([compilations.main, compilations.test]) {
-      tasks.getByName(compileKotlinTaskName).kotlinOptions {
-        moduleKind = 'umd'
-        sourceMap = true
-        metaInfo = true
+  if (kmpJsEnabled) {
+    js {
+      configure([compilations.main, compilations.test]) {
+        tasks.getByName(compileKotlinTaskName).kotlinOptions {
+          moduleKind = 'umd'
+          sourceMap = true
+          metaInfo = true
+        }
       }
+      nodejs()
+      browser()
     }
-    nodejs()
-    browser()
   }
 
   sourceSets {
     commonMain {
       dependencies {
-        api deps.kotlin.stdlib.common
         api project(':wire-runtime')
       }
     }
     jvmMain {
       dependencies {
-        api deps.kotlin.stdlib.jdk8
         implementation deps.okio.jvm
         api deps.guava
       }
@@ -37,11 +37,6 @@ kotlin {
         implementation deps.kotlin.test.junit
         implementation deps.assertj
         implementation deps.jimfs
-      }
-    }
-    jsMain {
-      dependencies {
-        api deps.kotlin.stdlib.js
       }
     }
     jsTest {

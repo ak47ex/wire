@@ -33,8 +33,11 @@ open class WireExtension(project: Project) {
   internal val protoJars = mutableSetOf<ProtoRootSet>()
   internal val roots = mutableSetOf<String>()
   internal val prunes = mutableSetOf<String>()
-  internal var since: String? = null
-  internal var until: String? = null
+  internal val moves = mutableListOf<Move>()
+  internal var onlyVersion: String? = null
+  internal var sinceVersion: String? = null
+  internal var untilVersion: String? = null
+  internal var permitPackageCycles: Boolean = false
 
   @Input
   @Optional
@@ -60,32 +63,45 @@ open class WireExtension(project: Project) {
 
   @Input
   @Optional
-  fun sinceVersion() = since
+  fun sinceVersion() = sinceVersion
 
   /**
-   * See [com.squareup.wire.schema.WireRun.since]
+   * See [com.squareup.wire.schema.WireRun.sinceVersion]
    */
-  fun sinceVersion(since: String) {
-    this.since = since
+  fun sinceVersion(sinceVersion: String) {
+    this.sinceVersion = sinceVersion
   }
 
   @Input
   @Optional
-  fun untilVersion() = until
+  fun untilVersion() = untilVersion
 
   /**
-   * See [com.squareup.wire.schema.WireRun.until]
+   * See [com.squareup.wire.schema.WireRun.untilVersion]
    */
-  fun untilVersion(until: String) {
-    this.until = until
+  fun untilVersion(untilVersion: String) {
+    this.untilVersion = untilVersion
   }
 
+  @Input
+  @Optional
+  fun onlyVersion() = onlyVersion
+
   /**
-   * Sets since and until to the same version.
+   * See [com.squareup.wire.schema.WireRun.onlyVersion].
    */
-  fun version(version: String) {
-    this.since = version
-    this.until = version
+  fun onlyVersion(onlyVersion: String) {
+    this.onlyVersion = onlyVersion
+  }
+
+  @Input
+  fun permitPackageCycles() = permitPackageCycles
+
+  /**
+   * See [com.squareup.wire.schema.WireRun.permitPackageCycles]
+   */
+  fun permitPackageCycles(permitPackageCycles: Boolean) {
+    this.permitPackageCycles = permitPackageCycles
   }
 
   /**
@@ -98,11 +114,6 @@ open class WireExtension(project: Project) {
   /** Specified what types to output where. Maps to [com.squareup.wire.schema.Target] */
   @get:Input
   val outputs = mutableListOf<WireOutput>()
-
-  /** Not supported, do not use. */
-  @get:Input
-  @get:Optional
-  var proto3Preview: String? = null
 
   @InputFiles
   @Optional
@@ -216,6 +227,12 @@ open class WireExtension(project: Project) {
     val customOutput = objectFactory.newInstance(CustomOutput::class.java)
     action.execute(customOutput)
     outputs += customOutput
+  }
+
+  fun move(action: Action<Move>) {
+    val move = objectFactory.newInstance(Move::class.java)
+    action.execute(move)
+    moves += move
   }
 
   open class ProtoRootSet {

@@ -136,17 +136,17 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |tag is out of range: 0
-            |  for field a (/source/message.proto at 2:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field a (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
             |tag is out of range: 19000
-            |  for field d (/source/message.proto at 5:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field d (/source/message.proto:5:3)
+            |  in message Message (/source/message.proto:1:1)
             |tag is out of range: 19999
-            |  for field e (/source/message.proto at 6:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field e (/source/message.proto:6:3)
+            |  in message Message (/source/message.proto:1:1)
             |tag is out of range: 536870912
-            |  for field h (/source/message.proto at 9:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field h (/source/message.proto:9:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin())
     }
   }
@@ -172,14 +172,14 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |tags are out of range: 0
-            |  for extensions (/source/message.proto at 2:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for extensions (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
             |tags are out of range: 19000, 19001 to 19998, 19999
-            |  for extensions (/source/message.proto at 5:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for extensions (/source/message.proto:5:3)
+            |  in message Message (/source/message.proto:1:1)
             |tags are out of range: 536870912
-            |  for extensions (/source/message.proto at 8:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for extensions (/source/message.proto:8:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -245,17 +245,17 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |packed=true not permitted on bytes
-            |  for field b (/source/message.proto at 3:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field b (/source/message.proto:3:3)
+            |  in message Message (/source/message.proto:1:1)
             |packed=true not permitted on string
-            |  for field d (/source/message.proto at 5:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field d (/source/message.proto:5:3)
+            |  in message Message (/source/message.proto:1:1)
             |packed=true not permitted on Message
-            |  for field f (/source/message.proto at 7:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field f (/source/message.proto:7:3)
+            |  in message Message (/source/message.proto:1:1)
             |packed=true not permitted on bytes
-            |  for field h (/source/message.proto at 11:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field h (/source/message.proto:11:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -355,8 +355,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |conflicting options: red, blue
-            |  for field a (/source/message.proto at 3:3)
-            |  in message Message (/source/message.proto at 2:1)
+            |  for field a (/source/message.proto:3:3)
+            |  in message Message (/source/message.proto:2:1)
             """.trimMargin()
       )
     }
@@ -377,8 +377,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for field unknown (/source/message.proto at 2:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field unknown (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -402,8 +402,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for field unknown (/source/message.proto at 4:5)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field unknown (/source/message.proto:4:5)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -426,8 +426,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |expected a message but was string
-            |  for rpc Call (/source/service.proto at 2:3)
-            |  in service Service (/source/service.proto at 1:1)
+            |  for rpc Call (/source/service.proto:2:3)
+            |  in service Service (/source/service.proto:1:1)
             """.trimMargin()
       )
     }
@@ -447,8 +447,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |expected a message but was string
-            |  for rpc Call (/source/service.proto at 2:3)
-            |  in service Service (/source/service.proto at 1:1)
+            |  for rpc Call (/source/service.proto:2:3)
+            |  in service Service (/source/service.proto:1:1)
             """.trimMargin()
       )
     }
@@ -471,8 +471,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for rpc Call (/source/service.proto at 2:3)
-            |  in service Service (/source/service.proto at 1:1)
+            |  for rpc Call (/source/service.proto:2:3)
+            |  in service Service (/source/service.proto:1:1)
             """.trimMargin()
       )
     }
@@ -492,8 +492,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for rpc Call (/source/service.proto at 2:3)
-            |  in service Service (/source/service.proto at 1:1)
+            |  for rpc Call (/source/service.proto:2:3)
+            |  in service Service (/source/service.proto:1:1)
             """.trimMargin()
       )
     }
@@ -513,7 +513,7 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for extend (/source/extend.proto at 1:1)
+            |  for extend (/source/extend.proto:1:1)
             """.trimMargin()
       )
     }
@@ -536,7 +536,7 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |expected a message but was string
-            |  for extend (/source/extend.proto at 1:1)
+            |  for extend (/source/extend.proto:1:1)
             """.trimMargin()
       )
     }
@@ -559,8 +559,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for field unknown (/source/message.proto at 4:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field unknown (/source/message.proto:4:3)
+            |  in extend Message (/source/message.proto:3:1)
             """.trimMargin()
       )
     }
@@ -582,11 +582,11 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve foo_package.Foo
-            |  for field unknown (/source/message.proto at 2:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field unknown (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
             |unable to resolve foo_package.Foo
-            |  for field also_unknown (/source/message.proto at 3:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field also_unknown (/source/message.proto:3:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -608,9 +608,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple fields share tag 1:
-            |  1. name1 (/source/message.proto at 2:3)
-            |  2. name2 (/source/message.proto at 3:3)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. name1 (/source/message.proto:2:3)
+            |  2. name2 (/source/message.proto:3:3)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -634,9 +634,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple fields share tag 1:
-            |  1. name1 (/source/message.proto at 2:3)
-            |  2. name2 (/source/message.proto at 4:5)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. name1 (/source/message.proto:2:3)
+            |  2. name2 (/source/message.proto:4:5)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -660,9 +660,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple fields share tag 1:
-            |  1. name1 (/source/message.proto at 4:3)
-            |  2. name2 (/source/message.proto at 5:3)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. name1 (/source/message.proto:4:3)
+            |  2. name2 (/source/message.proto:5:3)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -684,9 +684,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple fields share name a:
-            |  1. a (/source/message.proto at 2:3)
-            |  2. a (/source/message.proto at 3:3)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. a (/source/message.proto:2:3)
+            |  2. a (/source/message.proto:3:3)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -741,9 +741,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple fields share name a:
-            |  1. a (/source/extend1.proto at 3:3)
-            |  2. a (/source/extend2.proto at 3:3)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. a (/source/extend1.proto:3:3)
+            |  2. a (/source/extend2.proto:3:3)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -804,7 +804,7 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |expected a message but was Enum
-            |  for extend (/source/extend.proto at 2:1)
+            |  for extend (/source/extend.proto:2:1)
             """.trimMargin()
       )
     }
@@ -827,8 +827,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |extension fields cannot be required
-            |  for field a (/source/message.proto at 4:3)
-            |  in message Message (/source/message.proto at 1:1)
+            |  for field a (/source/message.proto:4:3)
+            |  in message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -847,7 +847,7 @@ class SchemaTest {
           .schema()
       fail()
     } catch (expected: IllegalStateException) {
-      assertThat(expected).hasMessage("Syntax error in /source/message.proto at 2:17: expected '{'")
+      assertThat(expected).hasMessage("Syntax error in /source/message.proto:2:17: expected '{'")
     }
   }
 
@@ -871,9 +871,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple enums share constant VALUE:
-            |  1. Message.Enum1.VALUE (/source/message.proto at 3:5)
-            |  2. Message.Enum2.VALUE (/source/message.proto at 6:5)
-            |  for message Message (/source/message.proto at 1:1)
+            |  1. Message.Enum1.VALUE (/source/message.proto:3:5)
+            |  2. Message.Enum2.VALUE (/source/message.proto:6:5)
+            |  for message Message (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -895,9 +895,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple enum constants share tag 1:
-            |  1. A (/source/message.proto at 2:3)
-            |  2. B (/source/message.proto at 3:3)
-            |  for enum Enum (/source/message.proto at 1:1)
+            |  1. A (/source/message.proto:2:3)
+            |  2. B (/source/message.proto:3:3)
+            |  for enum Enum (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -920,9 +920,9 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |multiple enum constants share tag 1:
-            |  1. A (/source/message.proto at 3:3)
-            |  2. B (/source/message.proto at 4:3)
-            |  for enum Enum (/source/message.proto at 1:1)
+            |  1. A (/source/message.proto:3:3)
+            |  2. B (/source/message.proto:4:3)
+            |  for enum Enum (/source/message.proto:1:1)
             """.trimMargin()
       )
     }
@@ -1013,8 +1013,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |a.proto needs to import b.proto
-            |  for field b (/source/a.proto at 3:3)
-            |  in message pa.A (/source/a.proto at 2:1)
+            |  for field b (/source/a.proto:3:3)
+            |  in message pa.A (/source/a.proto:2:1)
             """.trimMargin()
       )
     }
@@ -1042,8 +1042,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |a.proto needs to import b.proto
-            |  for field b (/source/a.proto at 3:3)
-            |  in message pa.A (/source/a.proto at 2:1)
+            |  for field b (/source/a.proto:3:3)
+            |  in message pa.A (/source/a.proto:2:1)
             """.trimMargin()
       )
     }
@@ -1069,8 +1069,8 @@ class SchemaTest {
         .schema()
     val service = schema.getService("pa.Service")!!
     val b = schema.getType("pb.B") as MessageType
-    assertThat(service.rpcs()[0].requestType).isEqualTo(b.type)
-    assertThat(service.rpcs()[0].responseType).isEqualTo(b.type)
+    assertThat(service.rpcs[0].requestType).isEqualTo(b.type)
+    assertThat(service.rpcs[0].responseType).isEqualTo(b.type)
   }
 
   @Test
@@ -1095,11 +1095,11 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |a.proto needs to import b.proto
-            |  for rpc Call (/source/a.proto at 3:3)
-            |  in service pa.Service (/source/a.proto at 2:1)
+            |  for rpc Call (/source/a.proto:3:3)
+            |  in service pa.Service (/source/a.proto:2:1)
             |a.proto needs to import b.proto
-            |  for rpc Call (/source/a.proto at 3:3)
-            |  in service pa.Service (/source/a.proto at 2:1)
+            |  for rpc Call (/source/a.proto:3:3)
+            |  in service pa.Service (/source/a.proto:2:1)
             """.trimMargin()
       )
     }
@@ -1152,7 +1152,7 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |a.proto needs to import b.proto
-            |  for extend pb.B (/source/a.proto at 2:1)
+            |  for extend pb.B (/source/a.proto:2:1)
             """.trimMargin()
       )
     }
@@ -1188,8 +1188,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected.message).isEqualTo("""
             |a.proto needs to import c.proto
-            |  for field c (/source/a.proto at 4:3)
-            |  in message pa.A (/source/a.proto at 3:1)
+            |  for field c (/source/a.proto:4:3)
+            |  in message pa.A (/source/a.proto:3:1)
             """.trimMargin()
       )
     }
@@ -1398,8 +1398,8 @@ class SchemaTest {
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
             |unable to resolve .b.MessageB
-            |  for field message_b (/source/a_b_c.proto at 6:3)
-            |  in message a.b.c.MessageC (/source/a_b_c.proto at 5:1)
+            |  for field message_b (/source/a_b_c.proto:6:3)
+            |  in message a.b.c.MessageC (/source/a_b_c.proto:5:1)
             """.trimMargin()
       )
     }
@@ -1422,7 +1422,7 @@ class SchemaTest {
           .schema()
       fail()
     } catch (expected: IllegalStateException) {
-      assertThat(expected).hasMessage("/source/test.proto at 2:3: 'group' is not supported")
+      assertThat(expected).hasMessage("/source/test.proto:2:3: 'group' is not supported")
     }
   }
 
@@ -1446,7 +1446,7 @@ class SchemaTest {
           .schema()
       fail()
     } catch (expected: IllegalStateException) {
-      assertThat(expected).hasMessage("/source/test.proto at 5:5: 'group' is not supported")
+      assertThat(expected).hasMessage("/source/test.proto:5:5: 'group' is not supported")
     }
   }
 
@@ -1465,9 +1465,9 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-            |tag 1 is reserved (/source/test.proto at 2:3)
-            |  for field name (/source/test.proto at 3:3)
-            |  in message Message (/source/test.proto at 1:1)
+            |tag 1 is reserved (/source/test.proto:2:3)
+            |  for field name (/source/test.proto:3:3)
+            |  in message Message (/source/test.proto:1:1)
             """.trimMargin()
       )
     }
@@ -1488,9 +1488,9 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-            |tag 2 is reserved (/source/test.proto at 2:3)
-            |  for field name (/source/test.proto at 3:3)
-            |  in message Message (/source/test.proto at 1:1)
+            |tag 2 is reserved (/source/test.proto:2:3)
+            |  for field name (/source/test.proto:3:3)
+            |  in message Message (/source/test.proto:1:1)
             """.trimMargin()
       )
     }
@@ -1511,9 +1511,9 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-            |name 'foo' is reserved (/source/test.proto at 2:3)
-            |  for field foo (/source/test.proto at 3:3)
-            |  in message Message (/source/test.proto at 1:1)
+            |name 'foo' is reserved (/source/test.proto:2:3)
+            |  for field foo (/source/test.proto:3:3)
+            |  in message Message (/source/test.proto:1:1)
             """.trimMargin()
       )
     }
@@ -1535,12 +1535,12 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-            |name 'foo' is reserved (/source/test.proto at 2:3)
-            |  for field foo (/source/test.proto at 4:3)
-            |  in message Message (/source/test.proto at 1:1)
-            |tag 1 is reserved (/source/test.proto at 3:3)
-            |  for field foo (/source/test.proto at 4:3)
-            |  in message Message (/source/test.proto at 1:1)
+            |name 'foo' is reserved (/source/test.proto:2:3)
+            |  for field foo (/source/test.proto:4:3)
+            |  in message Message (/source/test.proto:1:1)
+            |tag 1 is reserved (/source/test.proto:3:3)
+            |  for field foo (/source/test.proto:4:3)
+            |  in message Message (/source/test.proto:1:1)
             """.trimMargin()
       )
     }
@@ -1584,8 +1584,8 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-          |missing a zero value at the first element [proto3]
-          |  for enum Period (/source/period.proto at 3:1)
+          |missing a zero value at the first element in proto3
+          |  for enum Period (/source/period.proto:3:1)
           """.trimMargin()
       )
     }
@@ -1609,8 +1609,8 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-          |missing a zero value at the first element [proto3]
-          |  for enum Period (/source/period.proto at 3:1)
+          |missing a zero value at the first element in proto3
+          |  for enum Period (/source/period.proto:3:1)
           """.trimMargin()
       )
     }
@@ -1629,8 +1629,8 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-          |missing a zero value at the first element [proto3]
-          |  for enum Period (/source/period.proto at 3:1)
+          |missing a zero value at the first element in proto3
+          |  for enum Period (/source/period.proto:3:1)
           """.trimMargin()
       )
     }
@@ -1712,8 +1712,8 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-          |extensions are not allowed [proto3]
-          |  for extend Dinosaur (/source/dinosaur.proto at 7:1)
+          |extensions are not allowed in proto3
+          |  for extend Dinosaur (/source/dinosaur.proto:7:1)
           """.trimMargin()
       )
     }
@@ -1735,9 +1735,9 @@ class SchemaTest {
       fail()
     } catch (expected: SchemaException) {
       assertThat(expected).hasMessage("""
-            |user-defined default values are not permitted [proto3]
-            |  for field name (/source/dinosaur.proto at 4:3)
-            |  in message Dinosaur (/source/dinosaur.proto at 3:1)
+            |user-defined default values are not permitted in proto3
+            |  for field name (/source/dinosaur.proto:4:3)
+            |  in message Dinosaur (/source/dinosaur.proto:3:1)
             """.trimMargin()
       )
     }
@@ -1831,12 +1831,667 @@ class SchemaTest {
             |""".trimMargin()
         ).schema()
 
-    assertThat(schema.protoFile("message.proto")!!.options.elements).contains(deprecatedOptionElement)
-    assertThat(schema.getType("Message")!!.options.elements).contains(deprecatedOptionElement)
-    assertThat((schema.getType("Message")!! as MessageType).field("s")!!.options.elements).contains(deprecatedOptionElement)
-    assertThat(schema.getType("Enum")!!.options.elements).contains(deprecatedOptionElement)
-    assertThat((schema.getType("Enum")!! as EnumType).constant("A")!!.options.elements).contains(deprecatedOptionElement)
-    assertThat(schema.getService("Service")!!.options().elements).contains(deprecatedOptionElement)
-    assertThat(schema.getService("Service")!!.rpc("Call")!!.options.elements).contains(deprecatedOptionElement)
+    assertThat(schema.protoFile("message.proto")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat(schema.getType("Message")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat((schema.getType("Message")!! as MessageType).field("s")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat(schema.getType("Enum")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat((schema.getType("Enum")!! as EnumType).constant("A")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat(schema.getService("Service")!!.options.elements)
+        .contains(deprecatedOptionElement)
+    assertThat(schema.getService("Service")!!.rpc("Call")!!.options.elements)
+        .contains(deprecatedOptionElement)
+  }
+
+  @Test
+  fun forbidConflictingCamelCasedNamesInProto3() {
+    try {
+      RepoBuilder()
+          .add("dinosaur.proto", """
+              |syntax = "proto3";
+              |
+              |message Dinosaur {
+              |  string myName = 1;
+              |  string my_name = 2;
+              |}
+              |""".trimMargin()
+          ).schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |multiple fields share same JSON name 'myName':
+            |  1. myName (/source/dinosaur.proto:4:3)
+            |  2. my_name (/source/dinosaur.proto:5:3)
+            |  for message Dinosaur (/source/dinosaur.proto:3:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun noConflictWhenJsonNameResolvesItInProto3() {
+    // Both fields' camel-cased name would conflict but since `json_name` takes precedence, there
+    // shouldn't be any conflict here.
+    val schema = RepoBuilder()
+        .add("dinosaur.proto", """
+              |syntax = "proto3";
+              |
+              |message Dinosaur {
+              |  string myName = 1 [json_name = "one"];
+              |  string my_name = 2 [json_name = "two"];
+              |}
+              |""".trimMargin()
+        ).schema()
+    assertThat(schema).isNotNull()
+  }
+
+  @Test
+  fun forbidConflictingJsonNames() {
+    try {
+      RepoBuilder()
+          .add("dinosaur.proto", """
+              |message Dinosaur {
+              |  optional string myName = 1 [json_name = "JsonName"];
+              |  optional string my_name = 2 [json_name = "JsonName"];
+              |}
+              |""".trimMargin()
+          ).schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |multiple fields share same JSON name 'JsonName':
+            |  1. myName (/source/dinosaur.proto:2:3)
+            |  2. my_name (/source/dinosaur.proto:3:3)
+            |  for message Dinosaur (/source/dinosaur.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun allowConflictingCamelCasedNamesInProto2() {
+    val schema = RepoBuilder()
+        .add("dinosaur.proto", """
+              |syntax = "proto2";
+              |
+              |message Dinosaur {
+              |  optional string myName = 1;
+              |  optional string my_name = 2;
+              |}
+              |""".trimMargin()
+        ).schema()
+    assertThat(schema.getType("Dinosaur")).isNotNull()
+  }
+
+  @Test
+  fun nestedOptionSetting() {
+    val schema = RepoBuilder()
+        .add("dinosaur.proto", """
+              |package wire;
+              |import 'google/protobuf/descriptor.proto';
+              |extend google.protobuf.FieldOptions {
+              |  optional Foo my_field_option = 60004;
+              |}
+              |message Foo {
+              |  optional double a = 1 [(wire.my_field_option).baz.value = "b"];
+              |  optional Nested baz = 2;
+              |}
+              |message Nested {
+              |  optional string value = 1;
+              |}
+              |""".trimMargin()
+        )
+        .schema()
+    assertThat(schema.getType("wire.Foo")).isNotNull()
+  }
+
+  @Test
+  fun unresolvedFieldOption() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |message Message {
+               |  optional string name = 1 [(unicorn) = true];
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |unable to resolve option unicorn
+            |  for field name (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun unimportedOptionShouldBeUnresolved() {
+    try {
+      RepoBuilder()
+          .add("cashapp/pii.proto", """
+              |package cashapp;
+              |import 'google/protobuf/descriptor.proto';
+              |extend google.protobuf.FieldOptions {
+              |  optional bool friday = 60004;
+              |}
+              |""".trimMargin()
+          )
+          .add("message.proto", """
+              |message Message {
+              |  optional string name = 1 [(cashapp.friday) = true];
+              |}
+              """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |message.proto needs to import cashapp/pii.proto
+            |  for field friday (/source/cashapp/pii.proto:4:3)
+            |  in field name (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun unresolvedEnumValueOption() {
+    try {
+      RepoBuilder()
+          .add("enum.proto", """
+               |enum Enum {
+               |  A = 1 [(unicorn) = true];
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |unable to resolve option unicorn
+            |  for constant A (/source/enum.proto:2:3)
+            |  in enum Enum (/source/enum.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun unresolvedMessageOption() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |message Message {
+               |  option (unicorn) = true;
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |unable to resolve option unicorn
+            |  for message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun unresolvedFileOption() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |
+               |option (unicorn) = true;
+               |message Message {}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |unable to resolve option unicorn
+            |  for file /source/message.proto
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun resolveOptionsWithRelativePath() {
+    val schema = RepoBuilder()
+        .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FileOptions {
+             |  optional string file_status = 60000;
+             |}
+             """.trimMargin())
+        .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |import "squareup/common/options.proto";
+             |option (common.file_status) = "INTERNAL";
+             |
+             |message Message{}
+             """.trimMargin())
+        .schema()
+    assertThat(schema.protoFile("squareup/domain/message.proto")).isNotNull()
+  }
+
+  @Test
+  fun optionsWithRelativePathUsedInExtensions() {
+    val schema = RepoBuilder()
+        .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |
+             |message Message{}
+             """.trimMargin())
+        .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |import "squareup/domain/message.proto";
+             |
+             |extend squareup.domain.Message {
+             |  optional string type = 12000 [(maps_to) = "sup"];
+             |}
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123301;
+             |}
+             """.trimMargin())
+        .schema()
+    assertThat(schema.protoFile("squareup/domain/message.proto")).isNotNull()
+  }
+
+  @Test
+  fun optionsWithRelativePathUsedInExtensionsAmbiguous() {
+    try {
+      RepoBuilder()
+          .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |
+             |message Message{}
+             """.trimMargin())
+          .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |
+             |import "squareup/domain/message.proto";
+             |import "squareup/options1/special.proto";
+             |import "squareup/options2/special.proto";
+             |
+             |extend squareup.domain.Message {
+             |  optional string type = 12000 [(maps_to) = "sup"];
+             |}
+             """.trimMargin())
+          .add("squareup/options1/special.proto", """
+             |syntax = "proto2";
+             |package squareup.options1;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123301;
+             |}
+             """.trimMargin())
+          .add("squareup/options2/special.proto", """
+             |syntax = "proto2";
+             |package squareup.options2;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123302;
+             |}
+             """.trimMargin())
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |ambiguous options maps_to defined in
+            |  - /source/squareup/options1/special.proto:7:3
+            |  - /source/squareup/options2/special.proto:7:3
+            |  for field type (/source/squareup/common/options.proto:9:3)
+            |  in extend squareup.domain.Message (/source/squareup/common/options.proto:8:1)
+            """.trimMargin())
+    }
+  }
+
+  @Ignore("We throw as ambiguous but protoc resolve by the using the local one.")
+  @Test
+  fun optionsWithRelativePathUsedInExtensionsShouldUseClosest() {
+    try {
+      RepoBuilder()
+          .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |
+             |message Message{}
+             """.trimMargin())
+          .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |
+             |import "squareup/domain/message.proto";
+             |import "squareup/options/special.proto";
+             |
+             |extend squareup.domain.Message {
+             |  optional string type = 12000 [(maps_to) = "sup"];
+             |}
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123301;
+             |}
+             """.trimMargin())
+          .add("squareup/options/special.proto", """
+             |syntax = "proto2";
+             |package squareup.options;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123302;
+             |}
+             """.trimMargin())
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |ambiguous options maps_to defined in
+            |  - /source/squareup/common/options.proto:12:3
+            |  - /source/squareup/options/special.proto:7:3
+            |  for field type (/source/squareup/common/options.proto:9:3)
+            |  in message squareup.domain.Message (/source/squareup/domain/message.proto:4:1)
+            """.trimMargin())
+    }
+  }
+
+  @Test
+  fun optionsWithRelativePathUsedInExtensionsResolvable() {
+    val schema = RepoBuilder()
+        .add("squareup/domain/message.proto", """
+             |syntax = "proto2";
+             |package squareup.domain;
+             |
+             |message Message{}
+             """.trimMargin())
+        .add("squareup/common/options.proto", """
+             |syntax = "proto2";
+             |package squareup.common;
+             |
+             |import "squareup/domain/message.proto";
+             |import "squareup/options1/special.proto";
+             |import "squareup/options2/special.proto";
+             |
+             |extend squareup.domain.Message {
+             |  optional string type = 12000 [(options1.maps_to) = "sup"];
+             |}
+             """.trimMargin())
+        .add("squareup/options1/special.proto", """
+             |syntax = "proto2";
+             |package squareup.options1;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123301;
+             |}
+             """.trimMargin())
+        .add("squareup/options2/special.proto", """
+             |syntax = "proto2";
+             |package squareup.options2;
+             |
+             |import "google/protobuf/descriptor.proto";
+             |
+             |extend google.protobuf.FieldOptions {
+             |  optional string maps_to = 123302;
+             |}
+             """.trimMargin())
+        .schema()
+    assertThat(schema.protoFile("squareup/domain/message.proto")).isNotNull()
+  }
+
+  @Test
+  fun mapsCannotBeExtensions() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |message Message {}
+               |extend Message {
+               |  map<int32, int32> map_int_int = 1;
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |extension fields cannot be a map
+            |  for field map_int_int (/source/message.proto:3:3)
+            |  in message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun missingZeroTagAtFirstPositionInMapValue() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |message Message {
+               |  map<int32, Enum> map = 1;
+               |}
+               |enum Enum {
+               |  ONE = 1;
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |enum value in map must define 0 as the first value
+            |  for field map (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun zeroNotFirstConstantInMapValue() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+               |message Message {
+               |  map<int32, Enum> map = 1;
+               |}
+               |enum Enum {
+               |  ONE = 1;
+               |  ZERO = 0;
+               |}
+               """.trimMargin()
+          )
+          .schema()
+      fail()
+    } catch (expected: SchemaException) {
+      assertThat(expected).hasMessage("""
+            |enum value in map must define 0 as the first value
+            |  for field map (/source/message.proto:2:3)
+            |  in message Message (/source/message.proto:1:1)
+            """.trimMargin()
+      )
+    }
+  }
+
+  @Test
+  fun duplicateMessagesWithMembers() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+          |message Message {
+          |  optional string name = 1;
+          |}
+          |message Message {
+          |  optional string title = 1;
+          |}
+        """.trimMargin())
+          .schema()
+      fail()
+    } catch (exception: IllegalStateException) {
+      assertThat(exception).hasMessage(
+          "Message (/source/message.proto:4:1) is already defined at /source/message.proto:1:1")
+    }
+  }
+
+  @Test
+  fun duplicateServicesWithRpcs() {
+    try {
+      RepoBuilder()
+          .add("service.proto", """
+          |service Service {
+          |  rpc Send (Data) returns (Data) {}
+          |}
+          |service Service {
+          |  rpc Receive (Data) returns (Data) {}
+          |}
+          |message Data {}
+        """.trimMargin())
+          .schema()
+      fail()
+    } catch (exception: IllegalStateException) {
+      assertThat(exception).hasMessage(
+          "Service (/source/service.proto:4:1) is already defined at /source/service.proto:1:1")
+    }
+  }
+
+  @Test
+  fun duplicateRpcsInSameService() {
+    try {
+      RepoBuilder()
+          .add("service.proto", """
+          |service Service {
+          |  rpc Send (Data) returns (Data) {}
+          |  rpc Send (Data) returns (Data) {}
+          |}
+          |message Data {}
+        """.trimMargin())
+          .schema()
+      fail()
+    } catch (exception: SchemaException) {
+      assertThat(exception).hasMessage("""
+        |mutable rpcs share name Send:
+        |  1. Send (/source/service.proto:2:3)
+        |  2. Send (/source/service.proto:3:3)
+        |  for service Service (/source/service.proto:1:1)
+      """.trimMargin())
+    }
+  }
+
+  @Test
+  fun cannotUseProto2EnumsInProto3Message() {
+    try {
+      RepoBuilder()
+          .add("proto2.proto", """
+            |syntax = "proto2";
+            |enum Bit {
+            |  ZERO = 0;
+            |  ONE = 1;
+            |}
+          """.trimMargin())
+          .add("proto3.proto", """
+            |syntax = "proto3";
+            |import "proto2.proto";
+            |message Joint {
+            |  Bit bit = 1;
+            |}
+          """.trimMargin())
+          .schema()
+      fail()
+    } catch (exception: SchemaException) {
+      assertThat(exception).hasMessage("""
+        |Proto2 enums cannot be referenced in a proto3 message
+        |  for field bit (/source/proto3.proto:4:3)
+        |  in message Joint (/source/proto3.proto:3:1)
+      """.trimMargin())
+    }
+  }
+
+  @Test fun ambiguousEnumConstants() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+            |enum Foo {
+            |  ZERO = 0;
+            |  zero = 1;
+            |}
+          """.trimMargin())
+          .schema()
+      fail()
+    } catch (e: SchemaException) {
+      assertThat(e).hasMessage(
+          """|Ambiguous constant names (if you are using allow_alias, use the same value for these constants):
+             |  ZERO:0 (/source/message.proto:2:3)
+             |  zero:1 (/source/message.proto:3:3)
+             |  for enum Foo (/source/message.proto:1:1)
+             """.trimMargin()
+      )
+    }
+  }
+
+  @Test fun typeAliasAllowsAmbiguousEnumConstantsIfSameTag() {
+    val schema = RepoBuilder()
+        .add("message.proto", """
+            |enum Foo {
+            |  option allow_alias = true;
+            |  ZERO = 0;
+            |  zero = 0;
+            |}
+          """.trimMargin())
+        .schema()
+
+    val enumType = schema.getType("Foo") as EnumType
+    assertThat(enumType.constant("ZERO")!!.tag).isEqualTo(0)
+    assertThat(enumType.constant("zero")!!.tag).isEqualTo(0)
+  }
+
+  @Test fun typeAliasDoesNotAllowAmbiguousEnumConstantsIfDifferentTag() {
+    try {
+      RepoBuilder()
+          .add("message.proto", """
+            |enum Foo {
+            |  option allow_alias = true;
+            |  ZERO = 0;
+            |  zero = 1;
+            |}
+          """.trimMargin())
+          .schema()
+      fail()
+    } catch (e: SchemaException) {
+      assertThat(e).hasMessage(
+          """|Ambiguous constant names (if you are using allow_alias, use the same value for these constants):
+             |  ZERO:0 (/source/message.proto:3:3)
+             |  zero:1 (/source/message.proto:4:3)
+             |  for enum Foo (/source/message.proto:1:1)
+             """.trimMargin()
+      )
+    }
   }
 }

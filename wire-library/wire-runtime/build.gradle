@@ -4,22 +4,26 @@ kotlin {
   jvm {
     withJava()
   }
-  js {
-    configure([compilations.main, compilations.test]) {
-      tasks.getByName(compileKotlinTaskName).kotlinOptions {
-        moduleKind = 'umd'
-        sourceMap = true
-        metaInfo = true
+  if (kmpJsEnabled) {
+    js {
+      configure([compilations.main, compilations.test]) {
+        tasks.getByName(compileKotlinTaskName).kotlinOptions {
+          moduleKind = 'umd'
+          sourceMap = true
+          metaInfo = true
+        }
       }
+      nodejs()
+      browser()
     }
-    nodejs()
-    browser()
   }
-  iosX64()
-  iosArm64()
-  // Required to generate tests tasks: https://youtrack.jetbrains.com/issue/KT-26547
-  linuxX64()
-  macosX64()
+  if (kmpNativeEnabled) {
+    iosX64()
+    iosArm64()
+    // Required to generate tests tasks: https://youtrack.jetbrains.com/issue/KT-26547
+    linuxX64()
+    macosX64()
+  }
   sourceSets {
     all {
       languageSettings {
@@ -28,7 +32,6 @@ kotlin {
     }
     commonMain {
       dependencies {
-        api deps.kotlin.stdlib.common
         api deps.okio.multiplatform
       }
     }
@@ -40,7 +43,6 @@ kotlin {
     }
     jvmMain {
       dependencies {
-        api deps.kotlin.stdlib.jdk6
         compileOnly deps.android
       }
     }
@@ -48,11 +50,6 @@ kotlin {
       dependencies {
         implementation deps.assertj
         implementation deps.kotlin.test.junit
-      }
-    }
-    jsMain {
-      dependencies {
-        api deps.kotlin.stdlib.js
       }
     }
     jsTest {
@@ -66,12 +63,18 @@ kotlin {
     nativeTest {
       dependsOn commonTest
     }
+    darwinMain {
+      dependsOn commonMain
+    }
 
     configure([iosX64Main, iosArm64Main, linuxX64Main, macosX64Main]) {
       dependsOn nativeMain
     }
     configure([iosX64Test, iosArm64Test, linuxX64Test, macosX64Test]) {
       dependsOn nativeTest
+    }
+    configure([iosX64Main, iosArm64Main, macosX64Main]) {
+      dependsOn darwinMain
     }
   }
 }
@@ -81,7 +84,9 @@ afterEvaluate {
     dependsOn 'publishKotlinMultiplatformPublicationToTestRepository'
     dependsOn 'publishMetadataPublicationToTestRepository'
     dependsOn 'publishJvmPublicationToTestRepository'
-    dependsOn 'publishJsPublicationToTestRepository'
+    if (kmpJsEnabled) {
+      dependsOn 'publishJsPublicationToTestRepository'
+    }
   }
 }
 

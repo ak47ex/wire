@@ -64,21 +64,30 @@ import com.squareup.wire.schema.SemVer.Companion.toLowerCaseSemVer
  * ```
  *
  * Client code should typically target a single version. In this example, versions <= "4.0" will
- * have the `age` field only and versions >= "5.0" will have the `birth_date` field only.
+ * have the `age` field only and versions >= "5.0" will have the `birth_date` field only. One can
+ * target a single version using [only].
  *
  * Service code that supports many clients should support the union of versions of all supported
  * clients. Such code will have both the `age` and `birth_date` fields.
  */
 class PruningRules private constructor(builder: Builder) {
-  private val roots = builder.roots.toSet()
-  private val prunes = builder.prunes.toSet()
-  private val since = builder.since
-  private val until = builder.until
+  val roots = builder.roots.toSet()
+  val prunes = builder.prunes.toSet()
+
+  private val _since = builder.since
+  val since get() = _since?.version
+
+  private val _until = builder.until
+  val until get() = _until?.version
+
+  private val _only = builder.only
+  val only get() = _only?.version
+
   private val usedRoots = mutableSetOf<String>()
   private val usedPrunes = mutableSetOf<String>()
 
   val isEmpty: Boolean
-    get() = roots.isEmpty() && prunes.isEmpty() && since == null && until == null
+    get() = roots.isEmpty() && prunes.isEmpty() && _since == null && _until == null && _only == null
 
   /** Returns true unless [options] specifies a version that is outside of the configured range. */
   fun isFieldRetainedVersion(options: Options) =
@@ -93,16 +102,20 @@ class PruningRules private constructor(builder: Builder) {
     sinceMember: ProtoMember,
     untilMember: ProtoMember
   ): Boolean {
-    if (until != null) {
+    if (_until != null || _only != null) {
       val sinceOption = options.get(sinceMember)
       val since = (sinceOption as? String)?.toLowerCaseSemVer()
-      if (since != null && since >= until) return false
+      if (_until != null && since != null && since >= _until ||
+          _only != null && since != null && since > _only) {
+        return false
+      }
     }
 
-    if (since != null) {
+    if (_since != null || _only != null) {
+      val lowerBound = _since ?: _only!!
       val untilOption = options.get(untilMember)
       val until = (untilOption as? String)?.toLowerCaseSemVer()
-      if (until != null && until <= since) return false
+      if (until != null && until <= lowerBound) return false
     }
 
     return true
@@ -193,6 +206,7 @@ class PruningRules private constructor(builder: Builder) {
     internal val prunes = mutableSetOf<String>()
     internal var since: SemVer? = null
     internal var until: SemVer? = null
+    internal var only: SemVer? = null
 
     fun addRoot(identifier: String) = apply {
       roots.add(identifier)
@@ -226,7 +240,18 @@ class PruningRules private constructor(builder: Builder) {
       this.until = until?.toLowerCaseSemVer()
     }
 
+    /**
+     * The only version of the version range. Fields with `until` values greater than this, as well
+     * as fields with `since` values less than or equal to this, are retained.
+     */
+    fun only(only: String?) = apply {
+      this.only = only?.toLowerCaseSemVer()
+    }
+
     fun build(): PruningRules {
+      check(only == null || (since == null && until == null)) {
+        "only cannot be set along side since and until"
+      }
       check(since == null || until == null || since!! < until!!) {
         "expected since $since < until $until"
       }
@@ -241,8 +266,8 @@ class PruningRules private constructor(builder: Builder) {
   companion object {
     internal val FIELD_SINCE = ProtoMember.get(Options.FIELD_OPTIONS, "wire.since")
     internal val FIELD_UNTIL = ProtoMember.get(Options.FIELD_OPTIONS, "wire.until")
-    internal val ENUM_CONSTANT_SINCE = ProtoMember.get(Options.ENUM_VALUE_OPTIONS, "wire.since")
-    internal val ENUM_CONSTANT_UNTIL = ProtoMember.get(Options.ENUM_VALUE_OPTIONS, "wire.until")
+    internal val ENUM_CONSTANT_SINCE = ProtoMember.get(Options.ENUM_VALUE_OPTIONS, "wire.constant_since")
+    internal val ENUM_CONSTANT_UNTIL = ProtoMember.get(Options.ENUM_VALUE_OPTIONS, "wire.constant_until")
 
     /**
      * Returns the identifier or wildcard that encloses [identifier], or null if it is not enclosed.

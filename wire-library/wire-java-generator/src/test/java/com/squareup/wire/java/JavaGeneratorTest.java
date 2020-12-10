@@ -138,6 +138,7 @@ public final class JavaGeneratorTest {
         + "import com.squareup.wire.ProtoAdapter;\n"
         + "import com.squareup.wire.ProtoReader;\n"
         + "import com.squareup.wire.ProtoWriter;\n"
+        + "import com.squareup.wire.Syntax;\n"
         + "import com.squareup.wire.internal.Internal;\n"
         + "import foo.java.Bar;\n"
         + "import foo.java.CoinFlip;\n"
@@ -151,10 +152,10 @@ public final class JavaGeneratorTest {
         + "import target.java.JavaMessage;\n"
         + "\n"
         + "public abstract class AbstractProtoMessageAdapter extends ProtoAdapter<JavaMessage> {\n"
-        + "  private final ProtoAdapter<Map<String, Bar>> bars = ProtoAdapter.newMapAdapter(ProtoAdapter.STRING, Bar.ADAPTER);\n"
+        + "  private ProtoAdapter<Map<String, Bar>> bars;\n"
         + "\n"
         + "  public AbstractProtoMessageAdapter() {\n"
-        + "    super(FieldEncoding.LENGTH_DELIMITED, JavaMessage.class, \"type.googleapis.com/original.proto.ProtoMessage\");\n"
+        + "    super(FieldEncoding.LENGTH_DELIMITED, JavaMessage.class, \"type.googleapis.com/original.proto.ProtoMessage\", Syntax.PROTO_2, null);\n"
         + "  }\n"
         + "\n"
         + "  public abstract Foo field(JavaMessage value);\n"
@@ -170,10 +171,12 @@ public final class JavaGeneratorTest {
         + "\n"
         + "  @Override\n"
         + "  public int encodedSize(JavaMessage value) {\n"
-        + "    return Foo.ADAPTER.encodedSizeWithTag(1, field(value))\n"
-        + "        + ProtoAdapter.INT32.asRepeated().encodedSizeWithTag(3, numbers(value))\n"
-        + "        + CoinFlip.ADAPTER.encodedSizeWithTag(4, coin_flip(value))\n"
-        + "        + bars.encodedSizeWithTag(2, bars(value));\n"
+        + "    int result = 0;\n"
+        + "    result += Foo.ADAPTER.encodedSizeWithTag(1, field(value));\n"
+        + "    result += ProtoAdapter.INT32.asRepeated().encodedSizeWithTag(3, numbers(value));\n"
+        + "    result += CoinFlip.ADAPTER.encodedSizeWithTag(4, coin_flip(value));\n"
+        + "    result += barsAdapter().encodedSizeWithTag(2, bars(value));\n"
+        + "    return result;\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
@@ -181,7 +184,7 @@ public final class JavaGeneratorTest {
         + "    Foo.ADAPTER.encodeWithTag(writer, 1, field(value));\n"
         + "    ProtoAdapter.INT32.asRepeated().encodeWithTag(writer, 3, numbers(value));\n"
         + "    CoinFlip.ADAPTER.encodeWithTag(writer, 4, coin_flip(value));\n"
-        + "    bars.encodeWithTag(writer, 2, bars(value));\n"
+        + "    barsAdapter().encodeWithTag(writer, 2, bars(value));\n"
         + "  }\n"
         + "\n"
         + "  @Override\n"
@@ -194,7 +197,7 @@ public final class JavaGeneratorTest {
         + "    for (int tag; (tag = reader.nextTag()) != -1;) {\n"
         + "      switch (tag) {\n"
         + "        case 1: field = Foo.ADAPTER.decode(reader); break;\n"
-        + "        case 2: bars.putAll(bars.decode(reader)); break;\n"
+        + "        case 2: bars.putAll(barsAdapter().decode(reader)); break;\n"
         + "        case 3: numbers.add(ProtoAdapter.INT32.decode(reader)); break;\n"
         + "        case 4: {\n"
         + "          try {\n"
@@ -215,6 +218,15 @@ public final class JavaGeneratorTest {
         + "  @Override\n"
         + "  public JavaMessage redact(JavaMessage value) {\n"
         + "    return value;\n"
+        + "  }\n"
+        + "\n"
+        + "  private ProtoAdapter<Map<String, Bar>> barsAdapter() {\n"
+        + "    ProtoAdapter<Map<String, Bar>> result = bars;\n"
+        + "    if (result == null) {\n"
+        + "      result = ProtoAdapter.newMapAdapter(ProtoAdapter.STRING, Bar.ADAPTER);\n"
+        + "      bars = result;\n"
+        + "    }\n"
+        + "    return result;\n"
         + "  }\n"
         + "}\n");
   }
@@ -539,5 +551,61 @@ public final class JavaGeneratorTest {
         + "      if (type != null) builder.append(\", type=\").append(type);\n"
         + "      return builder.replace(0, 2, \"PhoneNumber{\").append('}').toString();\n"
         + "    }");
+  }
+
+  @Test public void wirePackageTakesPrecedenceOverJavaPackage() throws IOException {
+    RepoBuilder repoBuilder = new RepoBuilder()
+        .add("proto_package/person.proto",
+            "package proto_package;\n"
+                + "import \"wire/extensions.proto\";\n"
+                + "\n"
+                + "option java_package = \"java_package\";\n"
+                + "option (wire.wire_package) = \"wire_package\";\n"
+                + "\n"
+                + "message Person {\n"
+                + "	required string name = 1;\n"
+                + "}\n");
+    String code = repoBuilder.generateCode("proto_package.Person");
+    assertThat(code).contains("package wire_package");
+    assertThat(code).contains("class Person");
+  }
+
+  @Test public void wirePackageTakesPrecedenceOverProtoPackage() throws IOException {
+    RepoBuilder repoBuilder = new RepoBuilder()
+        .add("proto_package/person.proto",
+            "package proto_package;\n"
+            + "import \"wire/extensions.proto\";\n"
+            + "\n"
+            + "option (wire.wire_package) = \"wire_package\";\n"
+            + "\n"
+            + "message Person {\n"
+            + "	required string name = 1;\n"
+            + "}\n");
+    String code = repoBuilder.generateCode("proto_package.Person");
+    assertThat(code).contains("package wire_package");
+    assertThat(code).contains("class Person");
+  }
+
+  @Test public void wirePackageUsedInImport() throws IOException {
+    RepoBuilder repoBuilder = new RepoBuilder()
+        .add("proto_package/person.proto",
+        "package proto_package;\n"
+            + "import \"wire/extensions.proto\";\n"
+            + "\n"
+            + "option (wire.wire_package) = \"wire_package\";\n"
+            + "\n"
+            + "message Person {\n"
+            + "	required string name = 1;\n"
+            + "}\n")
+        .add("city_package/home.proto",
+            "package city_package;\n"
+            + "import \"proto_package/person.proto\";\n"
+            + "\n"
+            + "message Home {\n"
+            + "	repeated proto_package.Person person = 1;\n"
+            + "}\n");
+    String code = repoBuilder.generateCode("city_package.Home");
+    assertThat(code).contains("package city_package");
+    assertThat(code).contains("import wire_package.Person");
   }
 }

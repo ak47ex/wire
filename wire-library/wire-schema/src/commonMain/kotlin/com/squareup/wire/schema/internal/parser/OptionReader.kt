@@ -53,11 +53,11 @@ class OptionReader(internal val reader: SyntaxReader) {
     var name = reader.readName() // Option name.
     if (isExtension) name = "[$name]"
 
-    var subName: String? = null
+    var subNames: List<String> = emptyList()
     var c = reader.readChar()
     if (c == '.') {
       // Read nested field name. For example "baz" in "(foo.bar).baz = 12".
-      subName = reader.readName()
+      subNames = reader.readName().split(".")
       c = reader.readChar()
     }
     if (keyValueSeparator == ':' && c == '{') {
@@ -69,7 +69,7 @@ class OptionReader(internal val reader: SyntaxReader) {
     val kindAndValue = readKindAndValue()
     var kind = kindAndValue.kind
     var value = kindAndValue.value
-    if (subName != null) {
+    subNames.reversed().forEach { subName ->
       value = OptionElement.create(subName, kind, value)
       kind = Kind.OPTION
     }
@@ -97,7 +97,7 @@ class OptionReader(internal val reader: SyntaxReader) {
 
   /**
    * Returns a map of string keys and values. This is similar to a JSON object, with '{' and '}'
-   * surrounding the map, ':' separating keys from values, and ',' separating entries.
+   * surrounding the map, ':' separating keys from values, and ',' or ';' separating entries.
    */
   private fun readMap(
     openBrace: Char,
@@ -138,8 +138,8 @@ class OptionReader(internal val reader: SyntaxReader) {
         }
       }
 
-      // Discard optional ',' separator.
-      reader.peekChar(',')
+      // Discard optional separator.
+      reader.peekChar(',') || reader.peekChar(';')
     }
   }
 

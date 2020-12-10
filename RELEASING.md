@@ -86,7 +86,7 @@ Cutting a Release
     sed -i "" \
       "s/\<version\>\([^<]*\)\<\/version\>/\<version\>$RELEASE_VERSION\<\/version\>/g" \
       `find . -name "README.md"`
-    ./gradlew clean publish uploadArchives
+    ./gradlew -p wire-library clean publish uploadArchives
     ```
 
 5. Visit [Sonatype Nexus][sonatype_nexus] to promote (close then release) the artifact. Or drop it
@@ -96,7 +96,7 @@ Cutting a Release
 
     ```
     git commit -am "Prepare for release $RELEASE_VERSION."
-    git tag -a parent-$RELEASE_VERSION -m "Version $RELEASE_VERSION"
+    git tag -a $RELEASE_VERSION -m "Version $RELEASE_VERSION"
     sed -i "" \
       "s/VERSION_NAME=.*/VERSION_NAME=$NEXT_VERSION/g" \
       `find . -name "gradle.properties"`

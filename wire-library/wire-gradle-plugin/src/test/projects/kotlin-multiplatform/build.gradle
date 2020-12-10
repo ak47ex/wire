@@ -12,14 +12,10 @@ repositories {
 
 kotlin {
   jvm()
-  js {
-    nodejs()
-  }
-  sourceSets {
-    commonMain {
-      dependencies {
-        implementation "com.squareup.wire:wire-runtime-multiplatform:$VERSION_NAME"
-      }
+  def kmpJsEnabled = Boolean.parseBoolean(System.getProperty('kjs', 'true'))
+  if (kmpJsEnabled) {
+    js {
+      nodejs()
     }
   }
 }
@@ -28,7 +24,6 @@ wire {
   kotlin {
   }
 }
-
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
   kotlinOptions {

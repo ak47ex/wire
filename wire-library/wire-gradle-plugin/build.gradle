@@ -1,5 +1,6 @@
 apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven-publish'
 
 gradlePlugin {
   plugins {
@@ -13,10 +14,10 @@ gradlePlugin {
 dependencies {
   implementation project(':wire-compiler')
   implementation project(':wire-kotlin-generator')
-  implementation deps.kotlin.stdlib.jdk8
 
   compileOnly gradleApi()
   implementation deps.plugins.kotlin
+  compileOnly deps.plugins.android
 
   testImplementation deps.junit
   testImplementation deps.assertj
@@ -54,4 +55,10 @@ def installProtoJars = tasks.register("installProtoJars", Copy) {
 tasks.withType(Test).configureEach {
   dependsOn(installProtoJars)
   dependsOn(':wire-runtime:installLocally')
+}
+
+test {
+  // Fixtures run in a separate JVM, routing properties from the VM running the build into test VM.
+  systemProperty "kjs", System.getProperty("kjs")
+  systemProperty "knative", System.getProperty("knative")
 }

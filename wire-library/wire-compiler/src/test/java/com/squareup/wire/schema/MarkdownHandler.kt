@@ -20,6 +20,7 @@ import okio.buffer
 import okio.sink
 import java.nio.file.FileSystem
 import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * This is a sample handler that writes text files that describe types.
@@ -30,23 +31,28 @@ class MarkdownHandler : CustomHandlerBeta {
     fs: FileSystem,
     outDirectory: String,
     logger: WireLogger,
-    newProfileLoader: NewProfileLoader
+    profileLoader: ProfileLoader
   ): Target.SchemaHandler {
     return object : Target.SchemaHandler {
-      override fun handle(type: Type) {
-        writeMarkdownFile(type.type, toMarkdown(type))
+      override fun handle(type: Type): Path? {
+        return writeMarkdownFile(type.type, toMarkdown(type))
       }
 
-      override fun handle(service: Service) {
-        writeMarkdownFile(service.type(), toMarkdown(service))
+      override fun handle(service: Service): List<Path> {
+        return listOf(writeMarkdownFile(service.type, toMarkdown(service)))
       }
 
-      private fun writeMarkdownFile(protoType: ProtoType, markdown: String) {
+      override fun handle(extend: Extend, field: Field): Path? {
+        return null
+      }
+
+      private fun writeMarkdownFile(protoType: ProtoType, markdown: String): Path {
         val path = fs.getPath(outDirectory, *toPath(protoType).toTypedArray())
         Files.createDirectories(path.parent)
         path.sink().buffer().use { sink ->
           sink.writeUtf8(markdown)
         }
+        return path
       }
     }
   }
@@ -71,9 +77,9 @@ class MarkdownHandler : CustomHandlerBeta {
 
   private fun toMarkdown(service: Service): String {
     return """
-        |# ${service.type().simpleName}
+        |# ${service.type.simpleName}
         |
-        |${service.documentation()}
+        |${service.documentation}
         |""".trimMargin()
   }
 }

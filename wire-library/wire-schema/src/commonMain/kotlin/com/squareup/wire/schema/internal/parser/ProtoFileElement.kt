@@ -15,16 +15,15 @@
  */
 package com.squareup.wire.schema.internal.parser
 
+import com.squareup.wire.Syntax
 import com.squareup.wire.schema.Location
-import com.squareup.wire.schema.ProtoFile
-import com.squareup.wire.schema.SyntaxRules
 import kotlin.jvm.JvmStatic
 
 /** A single `.proto` file.  */
 data class ProtoFileElement(
   val location: Location,
   val packageName: String? = null,
-  val syntax: ProtoFile.Syntax? = null,
+  val syntax: Syntax? = null,
   val imports: List<String> = emptyList(),
   val publicImports: List<String> = emptyList(),
   val types: List<TypeElement> = emptyList(),
@@ -33,17 +32,15 @@ data class ProtoFileElement(
   val options: List<OptionElement> = emptyList()
 ) {
   fun toSchema() = buildString {
-    val syntaxRules = SyntaxRules.get(syntax)
-
     append("// ")
     append(location.withPathOnly())
     append('\n')
 
     if (syntax != null) {
-       append("syntax = \"$syntax\";\n")
+      append("syntax = \"$syntax\";\n")
     }
     if (packageName != null) {
-       append("package $packageName;\n")
+      append("package $packageName;\n")
     }
     if (imports.isNotEmpty() || publicImports.isNotEmpty()) {
       append('\n')
@@ -61,20 +58,20 @@ data class ProtoFileElement(
       }
     }
     if (types.isNotEmpty()) {
-      append('\n')
       for (typeElement in types) {
-        append(typeElement.toSchema(syntaxRules))
+        append('\n')
+        append(typeElement.toSchema())
       }
     }
     if (extendDeclarations.isNotEmpty()) {
-      append('\n')
       for (extendDeclaration in extendDeclarations) {
-        append(extendDeclaration.toSchema(syntaxRules))
+        append('\n')
+        append(extendDeclaration.toSchema())
       }
     }
     if (services.isNotEmpty()) {
-      append('\n')
       for (service in services) {
+        append('\n')
         append(service.toSchema())
       }
     }

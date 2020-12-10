@@ -42,9 +42,28 @@ src/
 build.gradle
 ```
 
-Because this project uses the standard location the plugin configuration is easy. Just a simple
-block in `build.gradle`:
+Because this project uses the default configuration, plugin setup is easy. Just a simple
+block in `build.gradle`,
 
+Using plugin application:
+```groovy
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'com.squareup.wire:wire-gradle-plugin:<version>'
+  }
+}
+
+apply plugin: 'com.squareup.wire'
+
+wire {
+  kotlin {}
+}
+```
+
+Using the plugins DSL:
 ```groovy
 plugins {
   id 'application'
@@ -53,8 +72,7 @@ plugins {
 }
 
 wire {
-  kotlin {
-  }
+  kotlin {}
 }
 ```
 
@@ -236,6 +254,43 @@ wire {
 }
 ```
 
+### Version Matching
+
+Another way to prune obsolete fields is to assign them a version, then to generate your code
+against a version range or a unique version. The fields out of the version range will get pruned.
+
+Members may be declared with `wire.since` and `wire.until` options; enum constant can use
+`wire.constant_since` and `wire.constant_until`. For example, these options declare a field `age`
+that was replaced with `birth_date` in version "5.0":
+
+```proto
+import "wire/extensions.proto";
+
+message Singer {
+  optional string name = 1;
+  optional int32 age = 2 [(wire.until) = "5.0"];
+  optional Date birth_date = 3 [(wire.since) = "5.0"];
+}
+```
+
+Client code should typically target a single version. In this example, clients will have the
+`name` and `birth_date` fields only.
+
+```groovy
+wire {
+  onlyVersion "5.0"
+}
+```
+
+Service code that supports many clients should support the union of versions of all supported
+clients. Such code will have `name`, as well as both the `age` and `birth_date` fields.
+
+```groovy
+wire {
+  sinceVersion "3.0"
+  untilVersion "6.0"
+}
+```
 
 Customizing Output
 ------------------
@@ -278,6 +333,12 @@ wire {
     // True to emit code that uses reflection for reading, writing, and toString
     // methods which are normally implemented with generated code.
     compact = true
+
+    // True to emit types for options declared on messages, fields, etc.
+    emitDeclaredOptions = false,
+
+    // True to emit annotations for options applied on messages, fields, etc.
+    emitAppliedOptions = true
   }
 }
 ```
@@ -318,6 +379,12 @@ wire {
     // True for emitted types to implement APIs for easier migration from the Java
     // target.
     javaInterop = true
+
+    // True to emit types for options declared on messages, fields, etc.
+    emitDeclaredOptions = false,
+
+    // True to emit annotations for options applied on messages, fields, etc.
+    emitAppliedOptions = true,
 
     // `suspending` to generate coroutines APIs that require a Kotlin coroutines context.
     // `blocking` to generate blocking APIs callable by Java and Kotlin.

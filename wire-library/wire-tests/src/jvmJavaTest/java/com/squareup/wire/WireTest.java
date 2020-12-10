@@ -15,7 +15,13 @@
  */
 package com.squareup.wire;
 
-import com.google.common.collect.Lists;
+import com.squareup.wire.protos.custom_options.FooBar;
+import com.squareup.wire.protos.custom_options.MessageWithOptions;
+import com.squareup.wire.protos.custom_options.MyFieldOptionOneOption;
+import com.squareup.wire.protos.custom_options.MyFieldOptionThreeOption;
+import com.squareup.wire.protos.custom_options.MyFieldOptionTwoOption;
+import com.squareup.wire.protos.custom_options.MyMessageOptionFourOption;
+import com.squareup.wire.protos.custom_options.MyMessageOptionTwoOption;
 import com.squareup.wire.protos.edgecases.NoFields;
 import com.squareup.wire.protos.person.Person;
 import com.squareup.wire.protos.person.Person.PhoneNumber;
@@ -25,11 +31,11 @@ import com.squareup.wire.protos.simple.SimpleMessage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import okio.Buffer;
 import okio.ByteString;
 import org.junit.Test;
-import squareup.protos.extension_collision.CollisionSubject;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -337,7 +343,7 @@ public class WireTest {
     try {
       builder.build();
       fail();
-    } catch (IllegalArgumentException expected) {
+    } catch (NullPointerException expected) {
       assertThat(expected).hasMessage("Parameter specified as non-null is null: "
           + "method com.squareup.wire.internal.Internal__InternalKt.immutableCopyOf, parameter list"
       );
@@ -384,7 +390,6 @@ public class WireTest {
         .build();
 
     String printedPerson = person.toString();
-    System.out.println(printedPerson);
     assertThat(printedPerson).isEqualTo(
         "Person{"
             + "name=Such\\, I mean it\\, such \\[a\\] \\{funny\\} name., "
@@ -392,5 +397,39 @@ public class WireTest {
             + "phone=[PhoneNumber{number=123\\,456\\,789}], "
             + "aliases=[B-lo\\,ved, D\\{esperado\\}]"
             + "}");
+  }
+
+  @Test public void createUseResursiveMapBuilderWithoutCrashing() {
+    ModelEvaluation model = new ModelEvaluation.Builder()
+        .name("name")
+        .score(33.0)
+        .models(new LinkedHashMap<>())
+        .build();
+    assertThat(ModelEvaluation.ADAPTER.encodeByteString(model).hex())
+        .isEqualTo("0a046e616d65110000000000804040");
+  }
+
+  @Test public void optionsOnMessageType() {
+    MyMessageOptionTwoOption myMessageOptionTwo
+        = MessageWithOptions.class.getAnnotation(MyMessageOptionTwoOption.class);
+    assertThat(myMessageOptionTwo.value()).isEqualTo(91011.0f);
+
+    MyMessageOptionFourOption myMessageOptionFour
+        = MessageWithOptions.class.getAnnotation(MyMessageOptionFourOption.class);
+    assertThat(myMessageOptionFour.value()).isEqualTo(FooBar.FooBarBazEnum.FOO);
+  }
+
+  @Test public void optionsOnField() throws Exception {
+    MyFieldOptionOneOption myFieldOptionOne = FooBar.class.getDeclaredField("foo")
+        .getAnnotation(MyFieldOptionOneOption.class);
+    assertThat(myFieldOptionOne.value()).isEqualTo(17);
+
+    MyFieldOptionTwoOption myFieldOptionTwo = FooBar.class.getDeclaredField("bar")
+        .getAnnotation(MyFieldOptionTwoOption.class);
+    assertThat(myFieldOptionTwo.value()).isEqualTo(33.5f);
+
+    MyFieldOptionThreeOption myFieldOptionThree = FooBar.class.getDeclaredField("baz")
+        .getAnnotation(MyFieldOptionThreeOption.class);
+    assertThat(myFieldOptionThree.value()).isEqualTo(FooBar.FooBarBazEnum.BAR);
   }
 }

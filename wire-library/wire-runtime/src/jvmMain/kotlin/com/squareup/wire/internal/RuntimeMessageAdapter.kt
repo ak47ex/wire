@@ -21,7 +21,9 @@ import com.squareup.wire.Message.Builder
 import com.squareup.wire.ProtoAdapter
 import com.squareup.wire.ProtoReader
 import com.squareup.wire.ProtoWriter
+import com.squareup.wire.Syntax
 import com.squareup.wire.WireField
+import com.squareup.wire.WireField.Label.OMIT_IDENTITY
 import java.io.IOException
 import java.util.Collections
 import java.util.LinkedHashMap
@@ -30,8 +32,37 @@ class RuntimeMessageAdapter<M : Message<M, B>, B : Builder<M, B>>(
   private val messageType: Class<M>,
   private val builderType: Class<B>,
   val fieldBindings: Map<Int, FieldBinding<M, B>>,
-  typeUrl: String?
-) : ProtoAdapter<M>(FieldEncoding.LENGTH_DELIMITED, messageType.kotlin, typeUrl) {
+  typeUrl: String?,
+  syntax: Syntax
+) : ProtoAdapter<M>(FieldEncoding.LENGTH_DELIMITED, messageType.kotlin, typeUrl, syntax) {
+
+  /**
+   * Field bindings by index. The indexes are consistent across all related fields including
+   * [jsonNames], [jsonAlternateNames], and the result of [jsonAdapters].
+   */
+  val fieldBindingsArray: Array<FieldBinding<M, B>> = fieldBindings.values.toTypedArray()
+
+  /** When writing each field as JSON this is the name to use. */
+  val jsonNames: List<String> = fieldBindingsArray.map { it.jsonName }
+
+  /**
+   * When reading JSON these are alternate names for each field. If null the field has no alternate
+   * name.
+   *
+   * For reserved keywords in Kotlin or Java, a field like `public` are written as so although the
+   * generated field name is `public_`. We wanna read in either form. As well, in proto3 fields
+   * declared in snake_case like `customer_id` are written in camelCase like `customerId`, but can
+   * be read in either form. We can use exclusive logic between the two cases because there's no
+   * keyword defined in snake_case. The alternate name will be absent if the field name isn't a
+   * keyword or if the snake and camel cases are the same, such as in single-word identifiers.
+   */
+  val jsonAlternateNames: List<String?> = fieldBindingsArray.map {
+    when {
+      it.jsonName != it.declaredName -> it.declaredName
+      it.jsonName != it.name -> it.name
+      else -> null
+    }
+  }
 
   fun newBuilder(): B = builderType.newInstance()
 
@@ -73,14 +104,15 @@ class RuntimeMessageAdapter<M : Message<M, B>, B : Builder<M, B>>(
         val builderValue = fieldBinding.getFromBuilder(builder)
         if (builderValue != null) {
           val redactedValue = fieldBinding.adapter().redact(builderValue)
-          fieldBinding[builder] = redactedValue
+          fieldBinding.set(builder, redactedValue)
         }
       } else if (isMessage && fieldBinding.label.isRepeated) {
         @Suppress("UNCHECKED_CAST")
         val values = fieldBinding.getFromBuilder(builder) as List<Any>
+
         @Suppress("UNCHECKED_CAST")
         val adapter = fieldBinding.singleAdapter() as ProtoAdapter<Any>
-        fieldBinding[builder] = values.redactElements(adapter)
+        fieldBinding.set(builder, values.redactElements(adapter))
       }
     }
     builder.clearUnknownFields()
@@ -141,17 +173,66 @@ class RuntimeMessageAdapter<M : Message<M, B>, B : Builder<M, B>>(
     return builder.build()
   }
 
+  /** Returns a message type that supports encoding and decoding JSON objects of type [type]. */
+  fun <F, A> jsonAdapters(
+    jsonIntegration: JsonIntegration<F, A>,
+    framework: F
+  ): List<A> {
+    val fieldBindings = fieldBindings.values.toTypedArray()
+    return fieldBindings.map { jsonIntegration.jsonAdapter(framework, syntax, it) }
+  }
+
+  /**
+   * Walk the fields of [message] and invoke [encodeValue] on each that should be written as JSON.
+   * This omits fields that have the identity value when that is required.
+   */
+  fun <A> writeAllFields(
+    message: M?,
+    jsonAdapters: List<A>,
+    redactedFieldsAdapter: A?,
+    encodeValue: (String, Any?, A) -> Unit
+  ) {
+    var redactedFields: MutableList<String>? = null
+    for (index in fieldBindingsArray.indices) {
+      val fieldBinding = fieldBindingsArray[index]
+      val value = fieldBinding[message!!]
+      if (fieldBinding.omitIdentity() && value == fieldBinding.adapter().identity) {
+        continue
+      }
+      if (fieldBinding.redacted && redactedFieldsAdapter != null && value != null) {
+        // We initialize here to avoid a performance hit for non-redacted code.
+        if (redactedFields == null) {
+          redactedFields = mutableListOf()
+        }
+        redactedFields.add(jsonNames[index])
+        continue
+      }
+      encodeValue(jsonNames[index], value, jsonAdapters[index])
+    }
+    if (redactedFields?.isNotEmpty() == true) {
+      encodeValue("__redacted_fields", redactedFields, redactedFieldsAdapter!!)
+    }
+  }
+
+  private fun FieldBinding<M, B>.omitIdentity(): Boolean {
+    if (label == OMIT_IDENTITY) return true
+    if (label.isRepeated && syntax == Syntax.PROTO_3) return true
+    if (isMap && syntax == Syntax.PROTO_3) return true
+    return false
+  }
+
   companion object {
     private const val REDACTED = "\u2588\u2588"
 
     @JvmStatic fun <M : Message<M, B>, B : Builder<M, B>> create(
       messageType: Class<M>,
-      typeUrl: String?
+      typeUrl: String?,
+      syntax: Syntax
     ): RuntimeMessageAdapter<M, B> {
       val builderType = getBuilderType(messageType)
       val fieldBindings = LinkedHashMap<Int, FieldBinding<M, B>>()
 
-      // Create tag bindings for fields annotated with '@WireField'
+      // Create tag bindings for fields annotated with '@WireField'.
       for (messageField in messageType.declaredFields) {
         val wireField = messageField.getAnnotation(WireField::class.java)
         if (wireField != null) {
@@ -160,7 +241,18 @@ class RuntimeMessageAdapter<M : Message<M, B>, B : Builder<M, B>>(
       }
 
       return RuntimeMessageAdapter(messageType, builderType,
-          Collections.unmodifiableMap(fieldBindings), typeUrl)
+          Collections.unmodifiableMap(fieldBindings), typeUrl, syntax)
+    }
+
+    @JvmStatic fun <M : Message<M, B>, B : Builder<M, B>> create(
+      messageType: Class<M>
+    ): RuntimeMessageAdapter<M, B> {
+      val defaultAdapter = get(messageType as Class<*>)
+      return create(
+          messageType = messageType,
+          typeUrl = defaultAdapter.typeUrl,
+          syntax = defaultAdapter.syntax
+      )
     }
 
     private fun <M : Message<M, B>, B : Builder<M, B>> getBuilderType(

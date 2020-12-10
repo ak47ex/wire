@@ -14,6 +14,7 @@ import kotlin.text.RegexOption.MULTILINE
 
 class WirePluginTest {
   private lateinit var gradleRunner: GradleRunner
+
   @Before
   fun setUp() {
     gradleRunner = GradleRunner.create()
@@ -34,9 +35,7 @@ class WirePluginTest {
     val result = gradleRunner.runFixture(fixtureRoot) { buildAndFail() }
 
     assertThat(result.task(":generateProtos")).isNull()
-    assertThat(result.output).contains(
-        """Either the Java or Kotlin plugin must be applied before the Wire Gradle plugin."""
-    )
+    assertThat(result.output).contains("Missing either the Java, Kotlin, or Android plugin")
   }
 
   @Test
@@ -83,7 +82,7 @@ class WirePluginTest {
 
     val result = gradleRunner.runFixture(fixtureRoot) { buildAndFail() }
 
-    val task = result.task(":generateProtos")
+    val task = result.task(":generateMainProtos")
     assertThat(task).isNotNull
     assertThat(result.output).contains("no sources")
   }
@@ -319,7 +318,8 @@ class WirePluginTest {
 
     assertThat(result.task(":generateProtos")).isNull()
     assertThat(result.output)
-        .contains("To generate Kotlin protos, please apply a Kotlin plugin.")
+        .contains(
+            "Wire Gradle plugin applied in project ':' but no supported Kotlin plugin was found")
   }
 
   @Test
@@ -439,7 +439,7 @@ class WirePluginTest {
       withArguments("run", "--stacktrace").build()
     }
 
-    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.task(":generateMainProtos")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dinosaur")
         .contains("Writing com.squareup.geology.Period")
@@ -461,7 +461,7 @@ class WirePluginTest {
       withArguments("run", "--stacktrace").build()
     }
 
-    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.task(":generateMainProtos")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dinosaur")
         .contains("Writing com.squareup.geology.Period")
@@ -483,7 +483,7 @@ class WirePluginTest {
       withArguments("run", "--stacktrace").build()
     }
 
-    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.task(":generateMainProtos")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dinosaur")
         .contains("Writing com.squareup.geology.Period")
@@ -505,7 +505,7 @@ class WirePluginTest {
       withArguments("run", "--stacktrace").build()
     }
 
-    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.task(":generateMainProtos")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dinosaur")
         .contains("Writing com.squareup.geology.Period")
@@ -655,7 +655,7 @@ class WirePluginTest {
 
     val result = gradleRunner.runFixture(fixtureRoot) { build() }
 
-    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.task(":generateMainProtos")).isNotNull
     assertThat(result.task(":helloWorld")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dig")
@@ -692,14 +692,38 @@ class WirePluginTest {
   }
 
   @Test
-  fun kotlinMultiplatform() {
-    val fixtureRoot = File("src/test/projects/kotlin-multiplatform")
+  fun only() {
+    val fixtureRoot = File("src/test/projects/only-version")
 
-    val result = gradleRunner.runFixture(fixtureRoot) {
-      withArguments("assemble", "--stacktrace").build()
-    }
+    val result = gradleRunner.runFixture(fixtureRoot) { build() }
 
     assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.output).contains("Writing com.squareup.media.NewsFlash")
+
+    val generatedProto =
+        File(fixtureRoot, "build/generated/source/wire/com/squareup/media/NewsFlash.kt")
+    assertThat(generatedProto).exists()
+
+    val newsFlash = generatedProto.readText()
+    assertThat(newsFlash).contains("val tv")
+    assertThat(newsFlash).doesNotContain("val website")
+    assertThat(newsFlash).doesNotContain("val radio")
+  }
+
+  @Test
+  fun kotlinMultiplatform() {
+    val fixtureRoot = File("src/test/projects/kotlin-multiplatform")
+    val kmpJsEnabled = System.getProperty("kjs", "true").toBoolean()
+    val kmpNativeEnabled = System.getProperty("knative", "true").toBoolean()
+
+    val result = gradleRunner.runFixture(fixtureRoot) {
+      withArguments(
+          "assemble", "--stacktrace", "-Dkjs=$kmpJsEnabled", "-Dknative=$kmpNativeEnabled"
+      ).build()
+    }
+
+    println(result.tasks.joinToString { it.toString() })
+    assertThat(result.task(":generateJvmMainProtos")).isNotNull
     assertThat(result.output)
         .contains("Writing com.squareup.dinosaurs.Dinosaur")
         .contains("Writing com.squareup.geology.Period")
@@ -776,17 +800,88 @@ class WirePluginTest {
     val fixtureRoot = File("src/test/projects/consecutive-runs")
 
     val firstRun = gradleRunner.runFixture(fixtureRoot) { build() }
-
-    assertThat(firstRun.task(":generateProtos")).isNotNull
+    assertThat(firstRun.task(":generateMainProtos")).isNotNull
     assertThat(firstRun.output)
         .contains("Writing com.squareup.geology.Period")
         .contains("src/test/projects/consecutive-runs/custom")
 
     val secondRun = gradleRunner.runFixture(fixtureRoot) { build() }
-
-    assertThat(secondRun.task(":generateProtos")).isNotNull
+    assertThat(secondRun.task(":generateMainProtos")).isNotNull
     assertThat(secondRun.output)
-        .contains("Task :generateProtos UP-TO-DATE")
+        .contains("Task :generateMainProtos UP-TO-DATE")
+  }
+
+  @Test
+  fun moveMessage() {
+    val fixtureRoot = File("src/test/projects/move-message")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { build() }
+
+    val task = result.task(":generateProtos")
+    assertThat(task).isNotNull
+    assertThat(result.output)
+        .contains("Writing squareup/dinosaurs/dinosaur.proto")
+        .contains("Writing squareup/geology/geology.proto")
+
+    val outputRoot = File(fixtureRoot, "build/generated/source/wire")
+
+    val dinosaurProto = File(outputRoot, "squareup/dinosaurs/dinosaur.proto").readText()
+    assertThat(dinosaurProto).contains("import \"squareup/geology/geology.proto\";")
+
+    val geologyProto = File(outputRoot, "squareup/geology/geology.proto").readText()
+    assertThat(geologyProto).contains("enum Period {")
+  }
+
+  @Test
+  fun emitJavaOptions() {
+    val fixtureRoot = File("src/test/projects/emit-java-options")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { build() }
+
+    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.output).contains("Writing squareup.options.DocumentationUrlOption")
+
+    val generatedProto = File(
+        fixtureRoot, "build/generated/source/wire/squareup/polygons/Octagon.java")
+    val octagon = generatedProto.readText()
+    assertThat(octagon)
+        .contains("""@DocumentationUrlOption("https://en.wikipedia.org/wiki/Octagon")""")
+  }
+
+  @Test
+  fun emitKotlinOptions() {
+    val fixtureRoot = File("src/test/projects/emit-kotlin-options")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { build() }
+
+    assertThat(result.task(":generateProtos")).isNotNull
+    assertThat(result.output).contains("Writing squareup.options.DocumentationUrlOption")
+
+    val generatedProto = File(
+        fixtureRoot, "build/generated/source/wire/squareup/polygons/Octagon.kt")
+    val octagon = generatedProto.readText()
+    assertThat(octagon)
+        .contains("""@DocumentationUrlOption("https://en.wikipedia.org/wiki/Octagon")""")
+  }
+
+  @Test
+  fun packageCycles() {
+    val fixtureRoot = File("src/test/projects/package-cycles")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { buildAndFail() }
+    assertThat(result.output).contains("packages form a cycle")
+  }
+
+  @Test
+  fun packageCyclesPermitted() {
+    val fixtureRoot = File("src/test/projects/package-cycles-permitted")
+
+    val result = gradleRunner.runFixture(fixtureRoot) { build() }
+    assertThat(result.output)
+        .contains("Writing people.Employee")
+        .contains("Writing people.OfficeManager")
+        .contains("Writing locations.Office")
+        .contains("Writing locations.Residence")
   }
 
   private fun GradleRunner.runFixture(
